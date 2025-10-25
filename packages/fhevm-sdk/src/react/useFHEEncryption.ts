@@ -45,28 +45,60 @@ export const toHex = (value: Uint8Array | string): `0x${string}` => {
 };
 
 // Build contract params from EncryptResult and ABI for a given function
-export const buildParamsFromAbi = (enc: EncryptResult, abi: any[], functionName: string): any[] => {
+// Additional non-encrypted parameters can be passed after functionName
+export const buildParamsFromAbi = (
+  enc: EncryptResult,
+  abi: any[],
+  functionName: string,
+  ...additionalParams: any[]
+): any[] => {
   const fn = abi.find((item: any) => item.type === "function" && item.name === functionName);
   if (!fn) throw new Error(`Function ABI not found for ${functionName}`);
 
-  return fn.inputs.map((input: any, index: number) => {
-    const raw = index === 0 ? enc.handles[0] : enc.inputProof;
-    switch (input.type) {
-      case "bytes32":
-      case "bytes":
-        return toHex(raw);
-      case "uint256":
-        return BigInt(raw as unknown as string);
-      case "address":
-      case "string":
-        return raw as unknown as string;
-      case "bool":
-        return Boolean(raw);
-      default:
-        console.warn(`Unknown ABI param type ${input.type}; passing as hex`);
-        return toHex(raw);
+  const result: any[] = [];
+  let encryptedParamIndex = 0; // Track which encrypted param we're on
+  let additionalParamIndex = 0; // Track which additional param we're on
+
+  fn.inputs.forEach((input: any) => {
+    // Check if this is an encrypted type (externalEuintX or externalEbool)
+    const isEncrypted = input.internalType?.startsWith("external");
+    // Check if this is the inputProof parameter (always type "bytes" and name "inputProof")
+    const isInputProof = input.type === "bytes" && (input.name === "inputProof" || input.name === "proof");
+
+    if (isEncrypted) {
+      // This is an encrypted parameter - use handles
+      const raw = enc.handles[encryptedParamIndex];
+      encryptedParamIndex++;
+
+      switch (input.type) {
+        case "bytes32":
+        case "bytes":
+          result.push(toHex(raw));
+          break;
+        case "uint256":
+          result.push(BigInt(raw as unknown as string));
+          break;
+        default:
+          console.warn(`Unknown encrypted param type ${input.type}; passing as hex`);
+          result.push(toHex(raw));
+      }
+    } else if (isInputProof) {
+      // This is the inputProof parameter - use enc.inputProof
+      result.push(toHex(enc.inputProof));
+    } else {
+      // This is a regular non-encrypted parameter - use additionalParams
+      if (additionalParamIndex < additionalParams.length) {
+        result.push(additionalParams[additionalParamIndex]);
+        additionalParamIndex++;
+      } else {
+        throw new Error(
+          `Missing parameter for ${input.name} (type: ${input.type}) in function ${functionName}. Expected more than ${additionalParams.length} additional params.`
+        );
+      }
     }
   });
+
+  return result;
 };
 
 export const useFHEEncryption = (params: {

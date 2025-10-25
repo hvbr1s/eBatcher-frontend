@@ -62,7 +62,7 @@ export const useFHECounterWagmi = (parameters: {
     if (!providerOrSigner) return undefined;
     return new ethers.Contract(
       fheCounter!.address,
-      (fheCounter as FHECounterInfo).abi,
+      (fheCounter as FHECounterInfo).abi as any,
       providerOrSigner,
     );
   };
@@ -137,9 +137,13 @@ export const useFHECounterWagmi = (parameters: {
   const getEncryptionMethodFor = (functionName: "increment" | "decrement") => {
     const functionAbi = fheCounter?.abi.find(item => item.type === "function" && item.name === functionName);
     if (!functionAbi) return { method: undefined as string | undefined, error: `Function ABI not found for ${functionName}` } as const;
+    if (functionAbi.type !== "function")
+      return { method: undefined as string | undefined, error: `Not a function: ${functionName}` } as const;
     if (!functionAbi.inputs || functionAbi.inputs.length === 0)
       return { method: undefined as string | undefined, error: `No inputs found for ${functionName}` } as const;
-    const firstInput = functionAbi.inputs[0]!;
+    const firstInput = functionAbi.inputs[0];
+    if (!firstInput || !firstInput.internalType)
+      return { method: undefined as string | undefined, error: `Invalid input for ${functionName}` } as const;
     return { method: getEncryptionMethod(firstInput.internalType), error: undefined } as const;
   };
 

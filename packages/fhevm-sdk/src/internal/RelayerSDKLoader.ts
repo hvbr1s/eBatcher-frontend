@@ -57,15 +57,41 @@ export class RelayerSDKLoader {
       script.async = true;
 
       script.onload = () => {
-        if (!isFhevmWindowType(window, this._trace)) {
-          console.log("[RelayerSDKLoader] script onload FAILED...");
-          reject(
-            new Error(
-              `RelayerSDKLoader: Relayer SDK script has been successfully loaded from ${SDK_CDN_URL}, however, the window.relayerSDK object is invalid.`
-            )
-          );
-        }
-        resolve();
+        console.log("[RelayerSDKLoader] Script tag loaded, checking for window.relayerSDK...");
+        console.log("[RelayerSDKLoader] window.relayerSDK exists?", "relayerSDK" in window);
+
+        // The UMD script needs time to execute and attach window.relayerSDK
+        // Poll for the relayerSDK object with timeout
+        const pollInterval = 50; // ms
+        const maxAttempts = 100; // 5 seconds total
+        let attempts = 0;
+
+        const poll = () => {
+          attempts++;
+
+          if (attempts % 20 === 0) {
+            console.log(`[RelayerSDKLoader] Still polling... attempt ${attempts}/${maxAttempts}`);
+            console.log("[RelayerSDKLoader] window keys with 'relayer':", Object.keys(window).filter(k => k.toLowerCase().includes('relayer')));
+          }
+
+          if (isFhevmWindowType(window, this._trace)) {
+            console.log(`[RelayerSDKLoader] ✅ relayerSDK loaded successfully after ${attempts * pollInterval}ms`);
+            resolve();
+          } else if (attempts >= maxAttempts) {
+            console.error("[RelayerSDKLoader] ❌ Failed to load relayerSDK after polling");
+            console.error("[RelayerSDKLoader] window.relayerSDK value:", (window as any).relayerSDK);
+            console.error("[RelayerSDKLoader] All window keys:", Object.keys(window).filter(k => !k.startsWith('webkit')));
+            reject(
+              new Error(
+                `RelayerSDKLoader: Relayer SDK script has been successfully loaded from ${SDK_CDN_URL}, however, the window.relayerSDK object is invalid after ${maxAttempts * pollInterval}ms. Check console for details.`
+              )
+            );
+          } else {
+            setTimeout(poll, pollInterval);
+          }
+        };
+
+        poll();
       };
 
       script.onerror = () => {

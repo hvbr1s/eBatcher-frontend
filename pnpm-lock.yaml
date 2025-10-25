@@ -70,6 +70,12 @@ importers:
       '@fhevm/solidity':
         specifier: ^0.8.0
         version: 0.8.0
+      '@openzeppelin/confidential-contracts':
+        specifier: ^0.2.0
+        version: 0.2.0(@fhevm/solidity@0.8.0)(@openzeppelin/contracts-upgradeable@5.4.0(@openzeppelin/contracts@5.4.0))(@openzeppelin/contracts@5.4.0)
+      '@openzeppelin/contracts':
+        specifier: ^5.0.0
+        version: 5.4.0
       '@zama-fhe/oracle-solidity':
         specifier: ^0.1.0
         version: 0.1.0(@openzeppelin/contracts@5.4.0)
@@ -206,6 +212,9 @@ importers:
       daisyui:
         specifier: 5.0.9
         version: 5.0.9
+      ethers:
+        specifier: ^6.15.0
+        version: 6.15.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       idb:
         specifier: ^8.0.3
         version: 8.0.3
@@ -1426,6 +1435,13 @@ packages:
   '@oclif/plugin-plugins@5.4.47':
     resolution: {integrity: sha512-eUWNbyYwKPbH+Ca98eI2OBZ6IioWM1aJ6SGp9TrVGRu2qNeDtG/qnqemv3v5qcHzPK211CPSvHJBFYef3J9rBg==}
     engines: {node: '>=18.0.0'}
+
+  '@openzeppelin/confidential-contracts@0.2.0':
+    resolution: {integrity: sha512-IU4k9+59CDy3MrYWQAJeSMo3MrIgJhDzHeWe7DIGZwf/+PR63GCdn9cbXVt/76uXRTpijZ7dBu8RP+JEg++slQ==}
+    peerDependencies:
+      '@fhevm/solidity': 0.7.0
+      '@openzeppelin/contracts': ^5.3.0
+      '@openzeppelin/contracts-upgradeable': ^5.3.0
 
   '@openzeppelin/contracts-upgradeable@5.4.0':
     resolution: {integrity: sha512-STJKyDzUcYuB35Zub1JpWW58JxvrFFVgQ+Ykdr8A9PGXgtq/obF5uoh07k2XmFyPxfnZdPdBdhkJ/n2YxJ87HQ==}
@@ -8865,6 +8881,12 @@ snapshots:
       yarn: 1.22.22
     transitivePeerDependencies:
       - supports-color
+
+  '@openzeppelin/confidential-contracts@0.2.0(@fhevm/solidity@0.8.0)(@openzeppelin/contracts-upgradeable@5.4.0(@openzeppelin/contracts@5.4.0))(@openzeppelin/contracts@5.4.0)':
+    dependencies:
+      '@fhevm/solidity': 0.8.0
+      '@openzeppelin/contracts': 5.4.0
+      '@openzeppelin/contracts-upgradeable': 5.4.0(@openzeppelin/contracts@5.4.0)
 
   '@openzeppelin/contracts-upgradeable@5.4.0(@openzeppelin/contracts@5.4.0)':
     dependencies:
