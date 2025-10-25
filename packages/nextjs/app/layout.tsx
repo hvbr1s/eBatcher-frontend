@@ -5,8 +5,8 @@ import "~~/styles/globals.css";
 import { getMetadata } from "~~/utils/helper/getMetadata";
 
 export const metadata = getMetadata({
-  title: "Zama Template",
-  description: "Built with FHEVM",
+  title: "Confidential Batcher",
+  description: "Batch transfer confidential ERC-7984 tokens with FHE encryption",
 });
 
 const DappWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -16,6 +16,11 @@ const DappWrapper = ({ children }: { children: React.ReactNode }) => {
         <link
           href="https://api.fontshare.com/v2/css?f[]=telegraf@400,500,700&display=swap"
           rel="stylesheet"
+        />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link
+          rel="icon"
+          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕵️‍♂️</text></svg>"
         />
       </head>
       <body>

@@ -43,27 +43,28 @@
 @plugin "daisyui/theme" {
   name: "dark";
 
-  --color-primary: #212638;
-  --color-primary-content: #f9fbff;
-  --color-secondary: #323f61;
-  --color-secondary-content: #f9fbff;
-  --color-accent: #4969a6;
-  --color-accent-content: #f9fbff;
-  --color-neutral: #f9fbff;
-  --color-neutral-content: #385183;
-  --color-base-100: #b7791f;
-  --color-base-200: #975a16;
-  --color-base-300: #744210;
-  --color-base-content: #f9fbff;
-  --color-info: #385183;
-  --color-success: #34eeb6;
-  --color-warning: #ffcf72;
-  --color-error: #ff8863;
+  /* Dark Windows 95 Retro Theme */
+  --color-primary: #008080;
+  --color-primary-content: #c0c0c0;
+  --color-secondary: #000080;
+  --color-secondary-content: #ffffff;
+  --color-accent: #800080;
+  --color-accent-content: #ffffff;
+  --color-neutral: #3a3a3a;
+  --color-neutral-content: #c0c0c0;
+  --color-base-100: #1a1a1a;
+  --color-base-200: #2d2d2d;
+  --color-base-300: #3a3a3a;
+  --color-base-content: #c0c0c0;
+  --color-info: #0000ff;
+  --color-success: #00ff00;
+  --color-warning: #ffff00;
+  --color-error: #ff0000;
 
-  --radius-field: 9999rem;
-  --radius-box: 1rem;
+  --radius-field: 0rem;
+  --radius-box: 0rem;
 
-  --tt-tailw: 6px;
+  --tt-tailw: 2px;
   --tt-bg: var(--color-primary);
 }
 
@@ -90,9 +91,10 @@
 
   body {
     min-height: 100vh;
-    font-family: "Telegraf", ui-sans-serif, system-ui, -apple-system, Segoe UI,
-      Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji",
-      "Segoe UI Emoji", "Segoe UI Symbol";
+    font-family: "Courier New", "Courier", monospace;
+    background: #1a1a1a;
+    image-rendering: pixelated;
+    color: #c0c0c0;
   }
 
   h1,
@@ -100,13 +102,14 @@
   h3,
   h4 {
     margin-bottom: 0.5rem;
-    line-height: 1;
+    line-height: 1.2;
+    font-weight: bold;
   }
 }
 
 :root,
 [data-theme] {
-  background: var(--color-base-200);
+  background: #1a1a1a;
 }
 
 .btn {
