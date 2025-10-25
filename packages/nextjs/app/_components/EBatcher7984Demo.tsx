@@ -85,36 +85,37 @@ export const EBatcher7984Demo = () => {
   //////////////////////////////////////////////////////////////////////////////
 
   const buttonClass =
-    "inline-flex items-center justify-center px-6 py-3 font-semibold shadow-lg " +
-    "transition-all duration-200 hover:scale-105 " +
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 " +
+    "inline-flex items-center justify-center px-6 py-3 font-bold uppercase " +
+    "border-2 border-t-white border-l-white border-r-black border-b-black " +
+    "active:border-t-black active:border-l-black active:border-r-white active:border-b-white " +
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#008080] " +
     "disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed";
 
   const primaryButtonClass =
     buttonClass +
-    " bg-[#FFD208] text-[#2D2D2D] hover:bg-[#A38025] focus-visible:ring-[#2D2D2D] cursor-pointer";
+    " bg-[#008080] text-white hover:bg-[#006666] cursor-pointer";
 
   const secondaryButtonClass =
-    buttonClass + " bg-black text-[#F4F4F4] hover:bg-[#1F1F1F] focus-visible:ring-[#FFD208] cursor-pointer";
+    buttonClass + " bg-[#c0c0c0] text-black hover:bg-[#a0a0a0] cursor-pointer";
 
-  const titleClass = "font-bold text-gray-900 text-xl mb-4 border-b-1 border-gray-700 pb-2";
-  const sectionClass = "bg-[#f4f4f4] shadow-lg p-6 mb-6 text-gray-900";
+  const titleClass = "font-bold text-[#00ffff] text-xl mb-4 pb-2 uppercase tracking-wide";
+  const sectionClass = "bg-[#2d2d2d] border-4 border-t-[#505050] border-l-[#505050] border-r-black border-b-black p-6 mb-6 text-[#c0c0c0]";
   const inputClass =
-    "w-full px-4 py-2 border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-[#FFD208] focus:border-transparent";
-  const labelClass = "block text-sm font-medium text-gray-700 mb-2";
+    "w-full px-3 py-2 border-2 border-t-black border-l-black border-r-white border-b-white bg-[#1a1a1a] text-[#00ff00] font-mono focus:ring-2 focus:ring-[#008080]";
+  const labelClass = "block text-sm font-bold text-[#c0c0c0] mb-2 uppercase";
 
   if (!isConnected) {
     return (
-      <div className="max-w-6xl mx-auto p-6 text-gray-900">
+      <div className="max-w-6xl mx-auto p-6">
         <div className="flex items-center justify-center">
-          <div className="bg-white bordershadow-xl p-8 text-center">
+          <div className={sectionClass + " text-center"}>
             <div className="mb-4">
-              <span className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-900/30 text-amber-400 text-3xl">
+              <span className="inline-flex items-center justify-center w-14 h-14 bg-[#1a1a1a] text-[#ffff00] text-3xl border-2 border-t-black border-l-black border-r-white border-b-white">
                 ⚠️
               </span>
             </div>
-            <h2 className="text-2xl font-extrabold text-gray-900 mb-2">Wallet not connected</h2>
-            <p className="text-gray-700 mb-6">Connect your wallet to use the eBatcher7984 demo.</p>
+            <h2 className="text-2xl font-bold text-[#00ffff] mb-2 uppercase">Wallet Not Connected</h2>
+            <p className="text-[#c0c0c0] mb-6">Connect your wallet to use the eBatcher7984 demo.</p>
             <div className="flex items-center justify-center">
               <RainbowKitCustomConnectButton />
             </div>
@@ -125,12 +126,12 @@ export const EBatcher7984Demo = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6 text-gray-900">
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="text-center mb-8 text-black">
-        <h1 className="text-3xl font-bold mb-2">eBatcher7984 Demo</h1>
-        <p className="text-gray-600">Batch transfer confidential ERC-7984 tokens using FHE</p>
-        <p className="text-sm text-gray-500 mt-2">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold mb-2 text-[#00ffff] uppercase tracking-wider">CONFIDENTIAL BATCHER</h1>
+        <p className="text-[#c0c0c0]">Batch transfer confidential ERC-7984 tokens using FHE</p>
+        <p className="text-sm text-[#808080] mt-2 font-mono">
           Contract: {eBatcher.contractAddress || "Not deployed"} | Max Batch Size: {eBatcher.maxBatchSize}
         </p>
       </div>
@@ -231,8 +232,8 @@ export const EBatcher7984Demo = () => {
       {eBatcher.message && (
         <div className={sectionClass}>
           <h3 className={titleClass}>💬 Messages</h3>
-          <div className="border bg-white border-gray-200 p-4">
-            <p className="text-gray-800">{eBatcher.message}</p>
+          <div className="border-2 border-t-black border-l-black border-r-white border-b-white bg-[#1a1a1a] p-4">
+            <p className="text-[#00ff00] font-mono">{eBatcher.message}</p>
           </div>
         </div>
       )}
@@ -262,14 +263,18 @@ export const EBatcher7984Demo = () => {
       {/* Instructions */}
       <div className={sectionClass}>
         <h3 className={titleClass}>ℹ️ Instructions</h3>
-        <div className="space-y-2 text-sm text-gray-700">
+        <div className="space-y-2 text-sm text-[#c0c0c0]">
           <p>1. Enter the ERC-7984 token contract address you want to batch transfer</p>
-          <p>2. Choose transfer mode: Same Amount (all recipients get the same) or Different Amounts (each gets a specific amount)</p>
+          <p>
+            2. Choose transfer mode: Same Amount (all recipients get the same) or Different Amounts (each gets a
+            specific amount)
+          </p>
           <p>3. Enter recipient addresses (one per line)</p>
           <p>4. Enter amount(s) - these will be encrypted using FHE</p>
           <p>5. Click &quot;Send Batch Transfer&quot; to execute</p>
-          <p className="font-semibold mt-4">
-            ⚠️ Note: Make sure you have approved the eBatcher7984 contract to spend your tokens before attempting a transfer!
+          <p className="font-bold mt-4 text-[#ffff00]">
+            ⚠️ Note: Make sure you have approved the eBatcher7984 contract to spend your tokens before attempting a
+            transfer!
           </p>
         </div>
       </div>
@@ -296,9 +301,9 @@ function printProperty(name: string, value: unknown) {
     displayValue = JSON.stringify(value);
   }
   return (
-    <div className="flex justify-between items-center py-2 px-3 bg-white border border-gray-200 w-full">
-      <span className="text-gray-800 font-medium">{name}</span>
-      <span className="ml-2 font-mono text-sm font-semibold text-gray-900 bg-gray-100 px-2 py-1 border border-gray-300">
+    <div className="flex justify-between items-center py-2 px-3 bg-[#1a1a1a] border-2 border-t-black border-l-black border-r-white border-b-white w-full">
+      <span className="text-[#c0c0c0] font-bold uppercase text-sm">{name}</span>
+      <span className="ml-2 font-mono text-sm font-semibold text-[#00ff00] bg-[#000000] px-2 py-1 border-2 border-t-black border-l-black border-r-[#505050] border-b-[#505050]">
         {displayValue}
       </span>
     </div>
@@ -307,16 +312,16 @@ function printProperty(name: string, value: unknown) {
 
 function printBooleanProperty(name: string, value: boolean) {
   return (
-    <div className="flex justify-between items-center py-2 px-3 bg-white border border-gray-200 w-full">
-      <span className="text-gray-700 font-medium">{name}</span>
+    <div className="flex justify-between items-center py-2 px-3 bg-[#1a1a1a] border-2 border-t-black border-l-black border-r-white border-b-white w-full">
+      <span className="text-[#c0c0c0] font-bold uppercase text-sm">{name}</span>
       <span
-        className={`font-mono text-sm font-semibold px-2 py-1 border ${
+        className={`font-mono text-sm font-bold px-2 py-1 border-2 ${
           value
-            ? "text-green-800 bg-green-100 border-green-300"
-            : "text-red-800 bg-red-100 border-red-300"
+            ? "text-[#00ff00] bg-[#000000] border-t-black border-l-black border-r-[#00ff00] border-b-[#00ff00]"
+            : "text-[#ff0000] bg-[#000000] border-t-black border-l-black border-r-[#ff0000] border-b-[#ff0000]"
         }`}
       >
-        {value ? "✓ true" : "✗ false"}
+        {value ? "✓ TRUE" : "✗ FALSE"}
       </span>
     </div>
   );
