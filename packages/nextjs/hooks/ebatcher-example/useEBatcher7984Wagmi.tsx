@@ -4,7 +4,8 @@ import { useCallback, useMemo, useState } from "react";
 import { useDeployedContractInfo } from "../helper";
 import { useWagmiEthers } from "../wagmi/useWagmiEthers";
 import { FhevmInstance } from "@fhevm-sdk";
-import { buildParamsFromAbi, getEncryptionMethod, toHex, useFHEEncryption } from "@fhevm-sdk";
+import { buildParamsFromAbi, getEncryptionMethod, toHex, useFHEEncryption, useFHEDecrypt } from "@fhevm-sdk";
+import { GenericStringInMemoryStorage } from "@fhevm-sdk";
 import { ethers } from "ethers";
 import type { Contract } from "~~/utils/helper/contract";
 import type { AllowedChainIds } from "~~/utils/helper/networks";
@@ -40,6 +41,28 @@ export const useEBatcher7984Wagmi = (parameters: {
   type EBatcherInfo = Contract<"eBatcher7984"> & { chainId?: number };
 
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+  // Balance decryption state
+  const [balanceTokenAddress, setBalanceTokenAddress] = useState<string>("");
+  const [balanceHandle, setBalanceHandle] = useState<string | null>(null);
+  const [decryptedBalance, setDecryptedBalance] = useState<string | null>(null);
+
+  // Storage for decryption signatures
+  const decryptionStorage = useMemo(() => new GenericStringInMemoryStorage(), []);
+
+  // Setup FHE decryption
+  const decryptRequests = useMemo(() => {
+    if (!balanceHandle || !balanceTokenAddress) return undefined;
+    return [{ handle: balanceHandle, contractAddress: balanceTokenAddress as `0x${string}` }];
+  }, [balanceHandle, balanceTokenAddress]);
+
+  const fheDecrypt = useFHEDecrypt({
+    instance,
+    ethersSigner: ethersSigner as any,
+    fhevmDecryptionSignatureStorage: decryptionStorage,
+    chainId,
+    requests: decryptRequests,
+  });
 
   // -------------
   // Helpers
@@ -239,6 +262,72 @@ export const useEBatcher7984Wagmi = (parameters: {
   );
 
   /**
+   * Get encrypted token balance and automatically trigger decryption
+   */
+  const getTokenBalance = useCallback(
+    async (tokenAddress: string, userAddress: string) => {
+      if (isProcessing || !canInteract) return;
+
+      setIsProcessing(true);
+      setMessage("Fetching encrypted balance...");
+      setBalanceTokenAddress(tokenAddress);
+      setBalanceHandle(null);
+      setDecryptedBalance(null);
+
+      try {
+        const tokenContract = new ethers.Contract(
+          tokenAddress,
+          [
+            "function confidentialBalanceOf(address account) external view returns (bytes32)",
+          ],
+          ethersReadonlyProvider,
+        );
+
+        // Get encrypted balance handle
+        const encryptedBalance = await tokenContract.confidentialBalanceOf(userAddress);
+        const handleHex = typeof encryptedBalance === "string" ? encryptedBalance : encryptedBalance.toString();
+
+        setMessage("Got encrypted balance handle, starting decryption...");
+        setBalanceHandle(handleHex);
+
+        // Wait a moment for React state to update, then auto-trigger decryption
+        setTimeout(() => {
+          if (fheDecrypt.canDecrypt) {
+            fheDecrypt.decrypt();
+          }
+        }, 100);
+      } catch (e) {
+        setMessage(`Failed to get balance: ${e instanceof Error ? e.message : String(e)}`);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [isProcessing, canInteract, ethersReadonlyProvider, fheDecrypt],
+  );
+
+  /**
+   * Decrypt the balance after getting the handle
+   */
+  const decryptBalance = useCallback(() => {
+    if (!fheDecrypt.canDecrypt) {
+      setMessage("Cannot decrypt: missing handle or FHEVM instance");
+      return;
+    }
+
+    setMessage("Starting decryption...");
+    fheDecrypt.decrypt();
+  }, [fheDecrypt]);
+
+  // Update decrypted balance when decryption completes
+  useMemo(() => {
+    if (fheDecrypt.results && balanceHandle && fheDecrypt.results[balanceHandle]) {
+      const balance = fheDecrypt.results[balanceHandle];
+      setDecryptedBalance(balance.toString());
+      setMessage(`✅ Decrypted Balance: ${balance.toString()}`);
+    }
+  }, [fheDecrypt.results, balanceHandle]);
+
+  /**
    * Rescue tokens sent to the contract (owner only)
    */
   const tokenRescue = useCallback(
@@ -296,6 +385,13 @@ export const useEBatcher7984Wagmi = (parameters: {
     tokenRescue,
     message,
     isProcessing,
+    // Balance decryption
+    getTokenBalance,
+    decryptBalance,
+    decryptedBalance,
+    balanceHandle,
+    isDecryptingBalance: fheDecrypt.isDecrypting,
+    decryptionError: fheDecrypt.error,
     // Wagmi-specific values
     chainId,
     accounts,
