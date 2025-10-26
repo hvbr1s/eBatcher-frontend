@@ -233,7 +233,31 @@ export const EBatcher7984Demo = () => {
         <div className={sectionClass}>
           <h3 className={titleClass}>💬 Messages</h3>
           <div className="border-2 border-t-black border-l-black border-r-white border-b-white bg-[#1a1a1a] p-4">
-            <p className="text-[#00ff00] font-mono">{eBatcher.message}</p>
+            <div className="text-[#00ff00] font-mono whitespace-pre-wrap break-all">
+              {eBatcher.message.split('\n').map((line, i) => {
+                // Check if line contains a URL
+                const urlMatch = line.match(/(https?:\/\/[^\s]+)/);
+                if (urlMatch) {
+                  const url = urlMatch[1];
+                  const parts = line.split(url);
+                  return (
+                    <div key={i}>
+                      {parts[0]}
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#00ffff] underline hover:text-[#ffff00]"
+                      >
+                        {url}
+                      </a>
+                      {parts[1]}
+                    </div>
+                  );
+                }
+                return <div key={i}>{line}</div>;
+              })}
+            </div>
           </div>
         </div>
       )}
