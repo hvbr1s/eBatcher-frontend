@@ -162,9 +162,9 @@ export const useEBatcher7984Wagmi = (parameters: {
         setMessage("Sending transaction...");
         const tx = await writeContract.batchSendTokenSameAmount(...params);
         const explorerUrl = chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
-        setMessage(`Waiting for confirmation...\nTX: ${tx.hash}\nView: ${explorerUrl}`);
-        const receipt = await tx.wait();
-        setMessage(`✅ Success! Sent ${amount.toString()} tokens to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nExplorer: ${explorerUrl}`);
+        setMessage(`⏳ Transaction submitted!\nTX: ${tx.hash}\nWaiting for block confirmation...\nView: ${explorerUrl}`);
+        const receipt = await tx.wait(2); // Wait for 2 confirmations
+        setMessage(`✅ Confirmed! Sent ${amount.toString()} tokens to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`);
       } catch (e) {
         setMessage(`Batch transfer failed: ${e instanceof Error ? e.message : String(e)}`);
       } finally {
@@ -226,9 +226,9 @@ export const useEBatcher7984Wagmi = (parameters: {
           encryptedAmounts.length > 0 ? (encryptedAmounts[0] as any).inputProof : "0x",
         );
         const explorerUrl = chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
-        setMessage(`Waiting for confirmation...\nTX: ${tx.hash}\nView: ${explorerUrl}`);
-        const receipt = await tx.wait();
-        setMessage(`✅ Success! Sent different amounts to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nExplorer: ${explorerUrl}`);
+        setMessage(`⏳ Transaction submitted!\nTX: ${tx.hash}\nWaiting for block confirmation...\nView: ${explorerUrl}`);
+        const receipt = await tx.wait(2); // Wait for 2 confirmations
+        setMessage(`✅ Confirmed! Sent different amounts to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`);
       } catch (e) {
         setMessage(`Batch transfer failed: ${e instanceof Error ? e.message : String(e)}`);
       } finally {
@@ -275,9 +275,9 @@ export const useEBatcher7984Wagmi = (parameters: {
         setMessage("Sending transaction...");
         const tx = await writeContract.tokenRescue(...params);
         const explorerUrl = chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
-        setMessage(`Waiting for confirmation...\nTX: ${tx.hash}\nView: ${explorerUrl}`);
-        const receipt = await tx.wait();
-        setMessage(`✅ Success! Rescued ${amount.toString()} tokens to ${recipient}.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nExplorer: ${explorerUrl}`);
+        setMessage(`⏳ Transaction submitted!\nTX: ${tx.hash}\nWaiting for block confirmation...\nView: ${explorerUrl}`);
+        const receipt = await tx.wait(2); // Wait for 2 confirmations
+        setMessage(`✅ Confirmed! Rescued ${amount.toString()} tokens to ${recipient}.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`);
       } catch (e) {
         setMessage(`Token rescue failed: ${e instanceof Error ? e.message : String(e)}`);
       } finally {
