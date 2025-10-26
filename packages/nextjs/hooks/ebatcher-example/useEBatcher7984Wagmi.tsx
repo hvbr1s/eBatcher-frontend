@@ -160,7 +160,8 @@ export const useEBatcher7984Wagmi = (parameters: {
 
         return allowance;
       } catch (e) {
-        console.error("Failed to check allowance:", e);
+        // Silently fail - token might not implement standard ERC-20 allowance
+        // This is expected for some ERC-7984 tokens
         return null;
       }
     },
@@ -185,7 +186,7 @@ export const useEBatcher7984Wagmi = (parameters: {
       setIsProcessing(true);
       setMessage(`Starting batch transfer to ${recipients.length} recipients...`);
 
-      // Check token allowance
+      // Check token allowance (optional - some tokens may not support it)
       if (accounts && accounts.length > 0) {
         const allowance = await checkTokenAllowance(tokenAddress, accounts[0]);
         const totalAmount = amount * BigInt(recipients.length);
@@ -301,7 +302,7 @@ export const useEBatcher7984Wagmi = (parameters: {
       setIsProcessing(true);
       setMessage(`Starting batch transfer to ${recipients.length} recipients with different amounts...`);
 
-      // Check token allowance
+      // Check token allowance (optional - some tokens may not support it)
       if (accounts && accounts.length > 0) {
         const allowance = await checkTokenAllowance(tokenAddress, accounts[0]);
         const totalAmount = amounts.reduce((sum, amt) => sum + amt, BigInt(0));
