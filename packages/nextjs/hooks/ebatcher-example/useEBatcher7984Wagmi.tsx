@@ -135,6 +135,39 @@ export const useEBatcher7984Wagmi = (parameters: {
   };
 
   /**
+   * Check token allowance for the batcher contract
+   */
+  const checkTokenAllowance = useCallback(
+    async (tokenAddress: string, ownerAddress: string) => {
+      if (!ethersReadonlyProvider || !eBatcher?.address) return null;
+
+      try {
+        const tokenContract = new ethers.Contract(
+          tokenAddress,
+          [
+            "function allowance(address owner, address spender) external view returns (uint256)",
+          ],
+          ethersReadonlyProvider,
+        );
+
+        const allowance = await tokenContract.allowance(ownerAddress, eBatcher.address);
+        console.log("📝 Token allowance:", {
+          token: tokenAddress,
+          owner: ownerAddress,
+          spender: eBatcher.address,
+          allowance: allowance.toString(),
+        });
+
+        return allowance;
+      } catch (e) {
+        console.error("Failed to check allowance:", e);
+        return null;
+      }
+    },
+    [ethersReadonlyProvider, eBatcher?.address],
+  );
+
+  /**
    * Batch send the same token amount to multiple recipients
    */
   const batchSendTokenSameAmount = useCallback(
@@ -151,6 +184,19 @@ export const useEBatcher7984Wagmi = (parameters: {
 
       setIsProcessing(true);
       setMessage(`Starting batch transfer to ${recipients.length} recipients...`);
+
+      // Check token allowance
+      if (accounts && accounts.length > 0) {
+        const allowance = await checkTokenAllowance(tokenAddress, accounts[0]);
+        const totalAmount = amount * BigInt(recipients.length);
+        if (allowance !== null && allowance < totalAmount) {
+          setMessage(
+            `⚠️ Insufficient token allowance!\nRequired: ${totalAmount.toString()}\nCurrent allowance: ${allowance.toString()}\n\nPlease approve the eBatcher contract to spend your tokens first.`,
+          );
+          setIsProcessing(false);
+          return;
+        }
+      }
 
       try {
         const { method, error } = getEncryptionMethodForFunction("batchSendTokenSameAmount");
@@ -182,19 +228,55 @@ export const useEBatcher7984Wagmi = (parameters: {
           recipients,
         );
 
+        console.log("📝 batchSendTokenSameAmount parameters:", {
+          tokenAddress,
+          recipients,
+          recipientsCount: recipients.length,
+          amount: amount.toString(),
+          encryptedHandle: toHex(enc.handles[0]),
+          inputProof: toHex(enc.inputProof),
+          allParams: params,
+        });
+
         setMessage("Sending transaction...");
         const tx = await writeContract.batchSendTokenSameAmount(...params);
         const explorerUrl = chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
         setMessage(`⏳ Transaction submitted!\nTX: ${tx.hash}\nWaiting for block confirmation...\nView: ${explorerUrl}`);
         const receipt = await tx.wait(2); // Wait for 2 confirmations
         setMessage(`✅ Confirmed! Sent ${amount.toString()} tokens to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`);
-      } catch (e) {
-        setMessage(`Batch transfer failed: ${e instanceof Error ? e.message : String(e)}`);
+      } catch (e: any) {
+        console.error("❌ Batch transfer error:", e);
+
+        let errorMessage = "Batch transfer failed: ";
+
+        // Try to extract revert reason
+        if (e.reason) {
+          errorMessage += e.reason;
+        } else if (e.error?.message) {
+          errorMessage += e.error.message;
+        } else if (e.data?.message) {
+          errorMessage += e.data.message;
+        } else if (e.message) {
+          errorMessage += e.message;
+        } else {
+          errorMessage += String(e);
+        }
+
+        // Log additional error details
+        console.error("Error details:", {
+          code: e.code,
+          reason: e.reason,
+          method: e.method,
+          transaction: e.transaction,
+          data: e.data,
+        });
+
+        setMessage(errorMessage);
       } finally {
         setIsProcessing(false);
       }
     },
-    [isProcessing, canInteract, maxBatchSize, encryptWith, getContract, eBatcher?.abi],
+    [isProcessing, canInteract, maxBatchSize, encryptWith, getContract, eBatcher?.abi, accounts, checkTokenAllowance, chainId],
   );
 
   /**
@@ -219,6 +301,19 @@ export const useEBatcher7984Wagmi = (parameters: {
       setIsProcessing(true);
       setMessage(`Starting batch transfer to ${recipients.length} recipients with different amounts...`);
 
+      // Check token allowance
+      if (accounts && accounts.length > 0) {
+        const allowance = await checkTokenAllowance(tokenAddress, accounts[0]);
+        const totalAmount = amounts.reduce((sum, amt) => sum + amt, BigInt(0));
+        if (allowance !== null && allowance < totalAmount) {
+          setMessage(
+            `⚠️ Insufficient token allowance!\nRequired: ${totalAmount.toString()}\nCurrent allowance: ${allowance.toString()}\n\nPlease approve the eBatcher contract to spend your tokens first.`,
+          );
+          setIsProcessing(false);
+          return;
+        }
+      }
+
       try {
         setMessage("Encrypting amounts...");
 
@@ -241,28 +336,66 @@ export const useEBatcher7984Wagmi = (parameters: {
         }
 
         // Build the final parameters manually since we have an array
+        const encryptedHandles = enc.handles.map(h => toHex(h));
+        const inputProof = toHex(enc.inputProof);
+
+        console.log("📝 batchSendTokenDifferentAmounts parameters:", {
+          tokenAddress,
+          recipients,
+          recipientsCount: recipients.length,
+          amounts: amounts.map(a => a.toString()),
+          encryptedHandles,
+          inputProof,
+        });
+
         setMessage("Sending transaction...");
         const tx = await writeContract.batchSendTokenDifferentAmounts(
           tokenAddress,
           recipients,
-          enc.handles.map(h => toHex(h)), // All encrypted handles from single encryption
-          toHex(enc.inputProof), // Single shared input proof
+          encryptedHandles, // All encrypted handles from single encryption
+          inputProof, // Single shared input proof
         );
         const explorerUrl = chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
         setMessage(`⏳ Transaction submitted!\nTX: ${tx.hash}\nWaiting for block confirmation...\nView: ${explorerUrl}`);
         const receipt = await tx.wait(2); // Wait for 2 confirmations
         setMessage(`✅ Confirmed! Sent different amounts to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`);
-      } catch (e) {
-        setMessage(`Batch transfer failed: ${e instanceof Error ? e.message : String(e)}`);
+      } catch (e: any) {
+        console.error("❌ Batch transfer error:", e);
+
+        let errorMessage = "Batch transfer failed: ";
+
+        // Try to extract revert reason
+        if (e.reason) {
+          errorMessage += e.reason;
+        } else if (e.error?.message) {
+          errorMessage += e.error.message;
+        } else if (e.data?.message) {
+          errorMessage += e.data.message;
+        } else if (e.message) {
+          errorMessage += e.message;
+        } else {
+          errorMessage += String(e);
+        }
+
+        // Log additional error details
+        console.error("Error details:", {
+          code: e.code,
+          reason: e.reason,
+          method: e.method,
+          transaction: e.transaction,
+          data: e.data,
+        });
+
+        setMessage(errorMessage);
       } finally {
         setIsProcessing(false);
       }
     },
-    [isProcessing, canInteract, maxBatchSize, encryptWith, getContract],
+    [isProcessing, canInteract, maxBatchSize, encryptWith, getContract, accounts, checkTokenAllowance, chainId],
   );
 
   /**
-   * Get encrypted token balance and automatically trigger decryption
+   * Get encrypted token balance
    */
   const getTokenBalance = useCallback(
     async (tokenAddress: string, userAddress: string) => {
@@ -275,6 +408,29 @@ export const useEBatcher7984Wagmi = (parameters: {
       setDecryptedBalance(null);
 
       try {
+        // Validate token address
+        if (!ethers.isAddress(tokenAddress)) {
+          setMessage("Invalid token address format");
+          return;
+        }
+
+        if (!ethersReadonlyProvider) {
+          setMessage("Provider not available");
+          return;
+        }
+
+        console.log("📝 Getting balance for:", {
+          tokenAddress,
+          userAddress,
+        });
+
+        // Check if contract exists
+        const code = await ethersReadonlyProvider.getCode(tokenAddress);
+        if (code === "0x") {
+          setMessage("No contract found at this address. Make sure it's a valid ERC-7984 token contract.");
+          return;
+        }
+
         const tokenContract = new ethers.Contract(
           tokenAddress,
           [
@@ -287,17 +443,40 @@ export const useEBatcher7984Wagmi = (parameters: {
         const encryptedBalance = await tokenContract.confidentialBalanceOf(userAddress);
         const handleHex = typeof encryptedBalance === "string" ? encryptedBalance : encryptedBalance.toString();
 
-        setMessage("Got encrypted balance handle, starting decryption...");
-        setBalanceHandle(handleHex);
+        console.log("✅ Got encrypted balance handle:", handleHex);
 
-        // Wait a moment for React state to update, then auto-trigger decryption
-        setTimeout(() => {
-          if (fheDecrypt.canDecrypt) {
-            fheDecrypt.decrypt();
-          }
-        }, 100);
-      } catch (e) {
-        setMessage(`Failed to get balance: ${e instanceof Error ? e.message : String(e)}`);
+        // Check if balance is zero (0x0000...0000)
+        if (handleHex === "0x0000000000000000000000000000000000000000000000000000000000000000") {
+          setMessage("Balance is zero (or uninitialized). No need to decrypt.");
+          setBalanceHandle(handleHex);
+          setDecryptedBalance("0");
+          return;
+        }
+
+        setMessage("Got encrypted balance handle. Click 'Decrypt Balance' to reveal the amount.");
+        setBalanceHandle(handleHex);
+      } catch (e: any) {
+        console.error("❌ Failed to get balance:", e);
+
+        let errorMessage = "Failed to get balance: ";
+
+        if (e.reason) {
+          errorMessage += e.reason;
+        } else if (e.error?.message) {
+          errorMessage += e.error.message;
+        } else if (e.message) {
+          errorMessage += e.message;
+        } else {
+          errorMessage += String(e);
+        }
+
+        console.error("Error details:", {
+          code: e.code,
+          reason: e.reason,
+          data: e.data,
+        });
+
+        setMessage(errorMessage);
       } finally {
         setIsProcessing(false);
       }
