@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useDeployedContractInfo } from "../helper";
 import { useWagmiEthers } from "../wagmi/useWagmiEthers";
 import { FhevmInstance } from "@fhevm-sdk";
@@ -161,9 +161,10 @@ export const useEBatcher7984Wagmi = (parameters: {
 
         setMessage("Sending transaction...");
         const tx = await writeContract.batchSendTokenSameAmount(...params);
-        setMessage("Waiting for confirmation...");
-        await tx.wait();
-        setMessage(`Successfully sent ${amount.toString()} tokens to ${recipients.length} recipients!`);
+        const explorerUrl = chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
+        setMessage(`Waiting for confirmation...\nTX: ${tx.hash}\nView: ${explorerUrl}`);
+        const receipt = await tx.wait();
+        setMessage(`✅ Success! Sent ${amount.toString()} tokens to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nExplorer: ${explorerUrl}`);
       } catch (e) {
         setMessage(`Batch transfer failed: ${e instanceof Error ? e.message : String(e)}`);
       } finally {
@@ -224,9 +225,10 @@ export const useEBatcher7984Wagmi = (parameters: {
           encryptedAmounts,
           encryptedAmounts.length > 0 ? (encryptedAmounts[0] as any).inputProof : "0x",
         );
-        setMessage("Waiting for confirmation...");
-        await tx.wait();
-        setMessage(`Successfully sent tokens to ${recipients.length} recipients!`);
+        const explorerUrl = chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
+        setMessage(`Waiting for confirmation...\nTX: ${tx.hash}\nView: ${explorerUrl}`);
+        const receipt = await tx.wait();
+        setMessage(`✅ Success! Sent different amounts to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nExplorer: ${explorerUrl}`);
       } catch (e) {
         setMessage(`Batch transfer failed: ${e instanceof Error ? e.message : String(e)}`);
       } finally {
@@ -272,9 +274,10 @@ export const useEBatcher7984Wagmi = (parameters: {
 
         setMessage("Sending transaction...");
         const tx = await writeContract.tokenRescue(...params);
-        setMessage("Waiting for confirmation...");
-        await tx.wait();
-        setMessage(`Successfully rescued ${amount.toString()} tokens to ${recipient}!`);
+        const explorerUrl = chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
+        setMessage(`Waiting for confirmation...\nTX: ${tx.hash}\nView: ${explorerUrl}`);
+        const receipt = await tx.wait();
+        setMessage(`✅ Success! Rescued ${amount.toString()} tokens to ${recipient}.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nExplorer: ${explorerUrl}`);
       } catch (e) {
         setMessage(`Token rescue failed: ${e instanceof Error ? e.message : String(e)}`);
       } finally {
