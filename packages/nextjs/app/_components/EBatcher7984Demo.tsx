@@ -83,10 +83,13 @@ export const EBatcher7984Demo = () => {
     }
   };
 
-  const handleGetAndDecryptBalance = async () => {
+  const handleGetBalance = async () => {
     if (!balanceTokenAddress || !address) return;
     await eBatcher.getTokenBalance(balanceTokenAddress, address);
-    // Decryption will be triggered automatically after getting the balance
+  };
+
+  const handleDecryptBalance = () => {
+    eBatcher.decryptBalance();
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -148,12 +151,6 @@ export const EBatcher7984Demo = () => {
         <h3 className={titleClass}>🔓 Decrypt Token Balance</h3>
 
         <div className="space-y-4">
-          {/* Connected Wallet Address Display */}
-          <div className="border-2 border-t-black border-l-black border-r-white border-b-white bg-[#1a1a1a] p-3">
-            <p className="text-[#c0c0c0] text-sm mb-1">Your Wallet Address:</p>
-            <p className="text-[#00ffff] font-mono text-sm break-all">{address}</p>
-          </div>
-
           {/* Token Address */}
           <div>
             <label className={labelClass}>ERC-7984 Token Address</label>
@@ -166,33 +163,54 @@ export const EBatcher7984Demo = () => {
             />
           </div>
 
-          {/* Get and Decrypt Balance Button */}
-          <button
-            className={primaryButtonClass + " w-full"}
-            disabled={!eBatcher.canInteract || !balanceTokenAddress}
-            onClick={handleGetAndDecryptBalance}
-          >
-            {eBatcher.isProcessing || eBatcher.isDecryptingBalance
-              ? "⏳ Processing..."
-              : eBatcher.canInteract
-                ? "🔍 Get & Decrypt My Balance"
-                : "❌ Cannot interact"}
-          </button>
+          {/* Step 1: Get Encrypted Balance Button */}
+          {!eBatcher.balanceHandle && (
+            <button
+              className={primaryButtonClass + " w-full"}
+              disabled={!eBatcher.canInteract || !balanceTokenAddress || eBatcher.isProcessing}
+              onClick={handleGetBalance}
+            >
+              {eBatcher.isProcessing
+                ? "⏳ Fetching..."
+                : eBatcher.canInteract
+                  ? "🔍 Get Encrypted Balance"
+                  : "❌ Cannot interact"}
+            </button>
+          )}
 
-          {/* Encrypted Balance Handle (optional display) */}
+          {/* Step 2: Show Encrypted Handle and Decrypt Button */}
           {eBatcher.balanceHandle && !eBatcher.decryptedBalance && (
-            <div className="border-2 border-t-black border-l-black border-r-white border-b-white bg-[#1a1a1a] p-3">
-              <p className="text-[#c0c0c0] text-sm mb-1">Encrypted Balance Handle:</p>
-              <p className="text-[#00ff00] font-mono text-xs break-all">{eBatcher.balanceHandle}</p>
-              <p className="text-[#ffff00] text-xs mt-2">⏳ Decrypting...</p>
+            <div className="space-y-4">
+              <div className="border-2 border-t-black border-l-black border-r-white border-b-white bg-[#1a1a1a] p-3">
+                <p className="text-[#c0c0c0] text-sm mb-1">Encrypted Balance Handle:</p>
+                <p className="text-[#00ff00] font-mono text-xs break-all">{eBatcher.balanceHandle}</p>
+              </div>
+              <button
+                className={secondaryButtonClass + " w-full"}
+                disabled={eBatcher.isDecryptingBalance}
+                onClick={handleDecryptBalance}
+              >
+                {eBatcher.isDecryptingBalance ? "⏳ Decrypting..." : "🔓 Decrypt Balance (Sign Message)"}
+              </button>
             </div>
           )}
 
           {/* Decrypted Balance Display */}
           {eBatcher.decryptedBalance && (
-            <div className="border-4 border-t-[#00ff00] border-l-[#00ff00] border-r-[#008000] border-b-[#008000] bg-[#000000] p-4">
-              <p className="text-[#c0c0c0] text-sm mb-2 uppercase">Your Decrypted Balance:</p>
-              <p className="text-[#00ff00] font-mono text-2xl font-bold">{eBatcher.decryptedBalance}</p>
+            <div className="space-y-4">
+              <div className="border-4 border-t-[#00ff00] border-l-[#00ff00] border-r-[#008000] border-b-[#008000] bg-[#000000] p-4">
+                <p className="text-[#c0c0c0] text-sm mb-2 uppercase">Your Decrypted Balance:</p>
+                <p className="text-[#00ff00] font-mono text-2xl font-bold">{eBatcher.decryptedBalance}</p>
+              </div>
+              {/* Reset button to check balance again */}
+              <button
+                className={secondaryButtonClass + " w-full"}
+                onClick={() => {
+                  setBalanceTokenAddress("");
+                }}
+              >
+                🔄 Check Another Token
+              </button>
             </div>
           )}
 
