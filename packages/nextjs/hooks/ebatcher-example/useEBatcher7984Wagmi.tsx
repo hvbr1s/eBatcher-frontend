@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useDeployedContractInfo } from "../helper";
 import { useWagmiEthers } from "../wagmi/useWagmiEthers";
 import { FhevmInstance } from "@fhevm-sdk";
-import { buildParamsFromAbi, getEncryptionMethod, useFHEEncryption } from "@fhevm-sdk";
+import { buildParamsFromAbi, getEncryptionMethod, toHex, useFHEEncryption } from "@fhevm-sdk";
 import { ethers } from "ethers";
 import type { Contract } from "~~/utils/helper/contract";
 import type { AllowedChainIds } from "~~/utils/helper/networks";
@@ -198,17 +198,17 @@ export const useEBatcher7984Wagmi = (parameters: {
 
       try {
         setMessage("Encrypting amounts...");
-        const encryptedAmounts: any[] = [];
 
-        for (let i = 0; i < amounts.length; i++) {
-          const enc = await encryptWith(builder => {
+        // Encrypt all amounts in a single session to get one shared inputProof
+        const enc = await encryptWith(builder => {
+          for (let i = 0; i < amounts.length; i++) {
             builder.add64(amounts[i]);
-          });
-          if (!enc) {
-            setMessage(`Encryption failed for amount ${i + 1}`);
-            return;
           }
-          encryptedAmounts.push(enc.handles[0]); // Get the encrypted handle
+        });
+
+        if (!enc) {
+          setMessage("Encryption failed");
+          return;
         }
 
         const writeContract = getContract("write");
@@ -222,8 +222,8 @@ export const useEBatcher7984Wagmi = (parameters: {
         const tx = await writeContract.batchSendTokenDifferentAmounts(
           tokenAddress,
           recipients,
-          encryptedAmounts,
-          encryptedAmounts.length > 0 ? (encryptedAmounts[0] as any).inputProof : "0x",
+          enc.handles.map(h => toHex(h)), // All encrypted handles from single encryption
+          toHex(enc.inputProof), // Single shared input proof
         );
         const explorerUrl = chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
         setMessage(`⏳ Transaction submitted!\nTX: ${tx.hash}\nWaiting for block confirmation...\nView: ${explorerUrl}`);
