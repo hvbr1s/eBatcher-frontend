@@ -43,23 +43,23 @@
 @plugin "daisyui/theme" {
   name: "dark";
 
-  /* Dark Windows 95 Retro Theme */
-  --color-primary: #008080;
-  --color-primary-content: #c0c0c0;
-  --color-secondary: #000080;
-  --color-secondary-content: #ffffff;
-  --color-accent: #800080;
-  --color-accent-content: #ffffff;
-  --color-neutral: #3a3a3a;
-  --color-neutral-content: #c0c0c0;
-  --color-base-100: #1a1a1a;
-  --color-base-200: #2d2d2d;
-  --color-base-300: #3a3a3a;
-  --color-base-content: #c0c0c0;
-  --color-info: #0000ff;
-  --color-success: #00ff00;
-  --color-warning: #ffff00;
-  --color-error: #ff0000;
+  /* Elegant Windows 95 Theme - Black on Cream */
+  --color-primary: #000000;
+  --color-primary-content: #faf8f3;
+  --color-secondary: #333333;
+  --color-secondary-content: #faf8f3;
+  --color-accent: #666666;
+  --color-accent-content: #faf8f3;
+  --color-neutral: #e0e0e0;
+  --color-neutral-content: #000000;
+  --color-base-100: #faf8f3;
+  --color-base-200: #f5f3ed;
+  --color-base-300: #e8e6e0;
+  --color-base-content: #000000;
+  --color-info: #0066cc;
+  --color-success: #008000;
+  --color-warning: #cc6600;
+  --color-error: #cc0000;
 
   --radius-field: 0rem;
   --radius-box: 0rem;
@@ -92,9 +92,9 @@
   body {
     min-height: 100vh;
     font-family: "Courier New", "Courier", monospace;
-    background: #1a1a1a;
+    background: #faf8f3;
     image-rendering: pixelated;
-    color: #c0c0c0;
+    color: #000000;
   }
 
   h1,
@@ -109,7 +109,7 @@
 
 :root,
 [data-theme] {
-  background: #1a1a1a;
+  background: #faf8f3;
 }
 
 .btn {

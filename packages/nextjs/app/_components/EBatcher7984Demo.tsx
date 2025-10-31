@@ -100,19 +100,19 @@ export const EBatcher7984Demo = () => {
     "inline-flex items-center justify-center px-6 py-3 font-bold uppercase " +
     "border-2 border-t-white border-l-white border-r-black border-b-black " +
     "active:border-t-black active:border-l-black active:border-r-white active:border-b-white " +
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#008080] " +
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black " +
     "disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed";
 
-  const primaryButtonClass = buttonClass + " bg-[#008080] text-white hover:bg-[#006666] cursor-pointer";
+  const primaryButtonClass = buttonClass + " bg-black text-[#faf8f3] hover:bg-[#333333] cursor-pointer";
 
-  const secondaryButtonClass = buttonClass + " bg-[#c0c0c0] text-black hover:bg-[#a0a0a0] cursor-pointer";
+  const secondaryButtonClass = buttonClass + " bg-[#e8e6e0] text-black hover:bg-[#d0cec8] cursor-pointer";
 
-  const titleClass = "font-bold text-[#00ffff] text-xl mb-4 pb-2 uppercase tracking-wide";
+  const titleClass = "font-bold text-black text-xl mb-4 pb-2 uppercase tracking-wide border-b-2 border-black";
   const sectionClass =
-    "bg-[#2d2d2d] border-4 border-t-[#505050] border-l-[#505050] border-r-black border-b-black p-6 mb-6 text-[#c0c0c0]";
+    "bg-[#faf8f3] border-4 border-t-[#e8e6e0] border-l-[#e8e6e0] border-r-[#808080] border-b-[#808080] p-6 mb-6 text-black shadow-md";
   const inputClass =
-    "w-full px-3 py-2 border-2 border-t-black border-l-black border-r-white border-b-white bg-[#1a1a1a] text-[#00ff00] font-mono focus:ring-2 focus:ring-[#008080]";
-  const labelClass = "block text-sm font-bold text-[#c0c0c0] mb-2 uppercase";
+    "w-full px-3 py-2 border-2 border-t-[#808080] border-l-[#808080] border-r-[#faf8f3] border-b-[#faf8f3] bg-[#faf8f3] text-black font-mono focus:ring-2 focus:ring-black";
+  const labelClass = "block text-sm font-bold text-black mb-2 uppercase";
 
   if (!isConnected) {
     return (
@@ -120,12 +120,12 @@ export const EBatcher7984Demo = () => {
         <div className="flex items-center justify-center">
           <div className={sectionClass + " text-center"}>
             <div className="mb-4">
-              <span className="inline-flex items-center justify-center w-14 h-14 bg-[#1a1a1a] text-[#ffff00] text-3xl border-2 border-t-black border-l-black border-r-white border-b-white">
+              <span className="inline-flex items-center justify-center w-14 h-14 bg-[#faf8f3] text-black text-3xl border-2 border-t-[#808080] border-l-[#808080] border-r-[#faf8f3] border-b-[#faf8f3]">
                 ⚠️
               </span>
             </div>
-            <h2 className="text-2xl font-bold text-[#00ffff] mb-2 uppercase">Wallet Not Connected</h2>
-            <p className="text-[#c0c0c0] mb-6">Connect your wallet to use the eBatcher7984 demo.</p>
+            <h2 className="text-2xl font-bold text-black mb-2 uppercase">Wallet Not Connected</h2>
+            <p className="text-black mb-6">Connect your wallet to use the eBatcher7984 demo.</p>
             <div className="flex items-center justify-center">
               <RainbowKitCustomConnectButton />
             </div>
@@ -139,9 +139,9 @@ export const EBatcher7984Demo = () => {
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-2 text-[#00ffff] uppercase tracking-wider">CONFIDENTIAL BATCHER</h1>
-        <p className="text-[#c0c0c0]">Batch transfer confidential ERC-7984 tokens using FHE</p>
-        <p className="text-sm text-[#808080] mt-2 font-mono">
+        <h1 className="text-4xl font-bold mb-2 text-black uppercase tracking-wider">ENCRYPTED BATCHER</h1>
+        <p className="text-black">Batch transfer confidential ERC-7984 tokens using FHE</p>
+        <p className="text-sm text-[#666666] mt-2 font-mono">
           Contract: {eBatcher.contractAddress || "Not deployed"} | Max Batch Size: {eBatcher.maxBatchSize}
         </p>
       </div>
@@ -181,9 +181,9 @@ export const EBatcher7984Demo = () => {
           {/* Step 2: Show Encrypted Handle and Decrypt Button */}
           {eBatcher.balanceHandle && !eBatcher.decryptedBalance && (
             <div className="space-y-4">
-              <div className="border-2 border-t-black border-l-black border-r-white border-b-white bg-[#1a1a1a] p-3">
-                <p className="text-[#c0c0c0] text-sm mb-1">Encrypted Balance Handle:</p>
-                <p className="text-[#00ff00] font-mono text-xs break-all">{eBatcher.balanceHandle}</p>
+              <div className="border-2 border-t-[#808080] border-l-[#808080] border-r-white border-b-white bg-[#f5f5f5] p-3">
+                <p className="text-black text-sm mb-1 font-bold">Encrypted Balance Handle:</p>
+                <p className="text-[#333333] font-mono text-xs break-all">{eBatcher.balanceHandle}</p>
               </div>
               <button
                 className={secondaryButtonClass + " w-full"}
@@ -198,9 +198,9 @@ export const EBatcher7984Demo = () => {
           {/* Decrypted Balance Display */}
           {eBatcher.decryptedBalance && (
             <div className="space-y-4">
-              <div className="border-4 border-t-[#00ff00] border-l-[#00ff00] border-r-[#008000] border-b-[#008000] bg-[#000000] p-4">
-                <p className="text-[#c0c0c0] text-sm mb-2 uppercase">Your Decrypted Balance:</p>
-                <p className="text-[#00ff00] font-mono text-2xl font-bold">{eBatcher.decryptedBalance}</p>
+              <div className="border-4 border-t-[#e8e6e0] border-l-[#e8e6e0] border-r-[#808080] border-b-[#808080] bg-[#faf8f3] p-4 shadow-lg">
+                <p className="text-[#666666] text-sm mb-2 uppercase">Your Decrypted Balance:</p>
+                <p className="text-black font-mono text-2xl font-bold">{eBatcher.decryptedBalance}</p>
               </div>
               {/* Reset button to check balance again */}
               <button
@@ -216,8 +216,8 @@ export const EBatcher7984Demo = () => {
 
           {/* Decryption Error */}
           {eBatcher.decryptionError && (
-            <div className="border-2 border-t-[#ff0000] border-l-[#ff0000] border-r-[#800000] border-b-[#800000] bg-[#1a1a1a] p-3">
-              <p className="text-[#ff0000] font-mono text-sm">{eBatcher.decryptionError}</p>
+            <div className="border-2 border-[#cc0000] bg-[#fff5f5] p-3">
+              <p className="text-[#cc0000] font-mono text-sm font-bold">{eBatcher.decryptionError}</p>
             </div>
           )}
         </div>
@@ -315,8 +315,8 @@ export const EBatcher7984Demo = () => {
       {eBatcher.message && (
         <div className={sectionClass}>
           <h3 className={titleClass}>💬 Messages</h3>
-          <div className="border-2 border-t-black border-l-black border-r-white border-b-white bg-[#1a1a1a] p-4">
-            <div className="text-[#00ff00] font-mono whitespace-pre-wrap break-all">
+          <div className="border-2 border-t-[#808080] border-l-[#808080] border-r-white border-b-white bg-[#f5f5f5] p-4">
+            <div className="text-black font-mono whitespace-pre-wrap break-all">
               {eBatcher.message.split("\n").map((line, i) => {
                 // Check if line contains a URL
                 const urlMatch = line.match(/(https?:\/\/[^\s]+)/);
@@ -330,7 +330,7 @@ export const EBatcher7984Demo = () => {
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#00ffff] underline hover:text-[#ffff00]"
+                        className="text-[#0066cc] underline hover:text-black"
                       >
                         {url}
                       </a>
@@ -370,7 +370,7 @@ export const EBatcher7984Demo = () => {
       {/* Instructions */}
       <div className={sectionClass}>
         <h3 className={titleClass}>ℹ️ Instructions</h3>
-        <div className="space-y-2 text-sm text-[#c0c0c0]">
+        <div className="space-y-2 text-sm text-black font-medium">
           <p>1. Enter the ERC-7984 token contract address you want to batch transfer</p>
           <p>
             2. Choose transfer mode: Same Amount (all recipients get the same) or Different Amounts (each gets a
@@ -379,7 +379,7 @@ export const EBatcher7984Demo = () => {
           <p>3. Enter recipient addresses (one per line)</p>
           <p>4. Enter amount(s) - these will be encrypted using FHE</p>
           <p>5. Click &quot;Send Batch Transfer&quot; to execute</p>
-          <p className="font-bold mt-4 text-[#ffff00]">
+          <p className="font-bold mt-4 text-[#cc6600] bg-[#fff9f0] p-3 border-l-4 border-[#cc6600]">
             ⚠️ Note: Make sure you have approved the eBatcher7984 contract to spend your tokens before attempting a
             transfer!
           </p>
@@ -408,9 +408,9 @@ function printProperty(name: string, value: unknown) {
     displayValue = JSON.stringify(value);
   }
   return (
-    <div className="flex justify-between items-center py-2 px-3 bg-[#1a1a1a] border-2 border-t-black border-l-black border-r-white border-b-white w-full">
-      <span className="text-[#c0c0c0] font-bold uppercase text-sm">{name}</span>
-      <span className="ml-2 font-mono text-sm font-semibold text-[#00ff00] bg-[#000000] px-2 py-1 border-2 border-t-black border-l-black border-r-[#505050] border-b-[#505050]">
+    <div className="flex justify-between items-center py-2 px-3 bg-[#f5f3ed] border-2 border-t-[#808080] border-l-[#808080] border-r-[#faf8f3] border-b-[#faf8f3] w-full">
+      <span className="text-black font-bold uppercase text-sm">{name}</span>
+      <span className="ml-2 font-mono text-sm font-semibold text-black bg-[#faf8f3] px-2 py-1 border-2 border-t-[#808080] border-l-[#808080] border-r-[#faf8f3] border-b-[#faf8f3]">
         {displayValue}
       </span>
     </div>
@@ -419,13 +419,13 @@ function printProperty(name: string, value: unknown) {
 
 function printBooleanProperty(name: string, value: boolean) {
   return (
-    <div className="flex justify-between items-center py-2 px-3 bg-[#1a1a1a] border-2 border-t-black border-l-black border-r-white border-b-white w-full">
-      <span className="text-[#c0c0c0] font-bold uppercase text-sm">{name}</span>
+    <div className="flex justify-between items-center py-2 px-3 bg-[#f5f3ed] border-2 border-t-[#808080] border-l-[#808080] border-r-[#faf8f3] border-b-[#faf8f3] w-full">
+      <span className="text-black font-bold uppercase text-sm">{name}</span>
       <span
         className={`font-mono text-sm font-bold px-2 py-1 border-2 ${
           value
-            ? "text-[#00ff00] bg-[#000000] border-t-black border-l-black border-r-[#00ff00] border-b-[#00ff00]"
-            : "text-[#ff0000] bg-[#000000] border-t-black border-l-black border-r-[#ff0000] border-b-[#ff0000]"
+            ? "text-[#008000] bg-[#faf8f3] border-t-[#808080] border-l-[#808080] border-r-[#faf8f3] border-b-[#faf8f3]"
+            : "text-[#cc0000] bg-[#faf8f3] border-t-[#808080] border-l-[#808080] border-r-[#faf8f3] border-b-[#faf8f3]"
         }`}
       >
         {value ? "✓ TRUE" : "✗ FALSE"}
@@ -433,3 +433,4 @@ function printBooleanProperty(name: string, value: boolean) {
     </div>
   );
 }
+
