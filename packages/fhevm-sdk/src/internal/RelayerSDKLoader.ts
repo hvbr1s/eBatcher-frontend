@@ -40,14 +40,35 @@ export class RelayerSDKLoader {
         `script[src="${SDK_CDN_URL}"]`
       );
       if (existingScript) {
-        if (!isFhevmWindowType(window, this._trace)) {
-          reject(
-            new Error(
-              "RelayerSDKLoader: window object does not contain a valid relayerSDK object."
-            )
-          );
-        }
-        resolve();
+        // Don't immediately check - the script might still be loading
+        // Use the same polling logic as new script loads
+        const pollInterval = 50;
+        const maxAttempts = 100;
+        let attempts = 0;
+
+        const poll = () => {
+          attempts++;
+
+          if (attempts % 20 === 0) {
+            console.log(`[RelayerSDKLoader] Polling existing script... attempt ${attempts}/${maxAttempts}`);
+          }
+
+          if (isFhevmWindowType(window, this._trace)) {
+            console.log(`[RelayerSDKLoader] ✅ relayerSDK loaded (existing script) after ${attempts * pollInterval}ms`);
+            resolve();
+          } else if (attempts >= maxAttempts) {
+            console.error("[RelayerSDKLoader] ❌ Existing script found but relayerSDK not available");
+            reject(
+              new Error(
+                "RelayerSDKLoader: window object does not contain a valid relayerSDK object."
+              )
+            );
+          } else {
+            setTimeout(poll, pollInterval);
+          }
+        };
+
+        poll();
         return;
       }
 

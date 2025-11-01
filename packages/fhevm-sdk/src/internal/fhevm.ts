@@ -284,7 +284,7 @@ export const createFhevmInstance = async (parameters: {
 
   const relayerSDK = (window as unknown as FhevmWindowType).relayerSDK;
 
-  const aclAddress = relayerSDK.SepoliaConfig.aclContractAddress;
+  const aclAddress = relayerSDK.SepoliaConfig.aclContractAddress as `0x${string}`;
   if (!checkIsAddress(aclAddress)) {
     throw new Error(`Invalid address: ${aclAddress}`);
   }

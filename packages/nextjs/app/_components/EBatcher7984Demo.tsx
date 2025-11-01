@@ -20,10 +20,19 @@ export const EBatcher7984Demo = () => {
   //////////////////////////////////////////////////////////////////////////////
 
   // Create EIP-1193 provider from wagmi for FHEVM
+  // IMPORTANT: For Sepolia, we use RPC URL string instead of window.ethereum
+  // to ensure the SDK connects to the correct network for contract reads
   const provider = useMemo(() => {
     if (typeof window === "undefined") return undefined;
+    
+    // If on Sepolia, use RPC URL string for proper network connection
+    if (chainId === 11155111) {
+      return "https://ethereum-sepolia-rpc.publicnode.com";
+    }
+    
+    // For other networks (like local hardhat), use wallet provider
     return (window as any).ethereum;
-  }, []);
+  }, [chainId]);
 
   const initialMockChains = { 31337: "http://localhost:8545" };
 
@@ -379,10 +388,6 @@ export const EBatcher7984Demo = () => {
           <p>3. Enter recipient addresses (one per line)</p>
           <p>4. Enter amount(s) - these will be encrypted using FHE</p>
           <p>5. Click &quot;Send Batch Transfer&quot; to execute</p>
-          <p className="font-bold mt-4 text-[#cc6600] bg-[#fff9f0] p-3 border-l-4 border-[#cc6600]">
-            ⚠️ Note: Make sure you have approved the eBatcher7984 contract to spend your tokens before attempting a
-            transfer!
-          </p>
         </div>
       </div>
     </div>

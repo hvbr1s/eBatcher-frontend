@@ -22,12 +22,19 @@ export const FHECounterDemo = () => {
   //////////////////////////////////////////////////////////////////////////////
 
   // Create EIP-1193 provider from wagmi for FHEVM
+  // IMPORTANT: For Sepolia, we use RPC URL string instead of window.ethereum
+  // to ensure the SDK connects to the correct network for contract reads
   const provider = useMemo(() => {
     if (typeof window === "undefined") return undefined;
 
-    // Get the wallet provider from window.ethereum
+    // If on Sepolia, use RPC URL string for proper network connection
+    if (chainId === 11155111) {
+      return "https://ethereum-sepolia-rpc.publicnode.com";
+    }
+    
+    // For other networks (like local hardhat), use wallet provider
     return (window as any).ethereum;
-  }, []);
+  }, [chainId]);
 
   const initialMockChains = { 31337: "http://localhost:8545" };
 
