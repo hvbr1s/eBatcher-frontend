@@ -1,25 +1,35 @@
 # eBatcher7984 Quick Start Guide
 
-## ✅ Contract Already Deployed
+## 🌐 Live Deployment on Sepolia
 
-**Sepolia Testnet:** `0x6c2C8A3Bd837f8F0c3286885ea17c17392af91df`
+**Frontend:** [https://ebatcher-frontend.onrender.com](https://ebatcher-frontend.onrender.com)
+
+**Contract (Sepolia):** [`0x6c2C8A3Bd837f8F0c3286885ea17c17392af91df`](https://sepolia.etherscan.io/address/0x6c2C8A3Bd837f8F0c3286885ea17c17392af91df)
 
 You can start using the app immediately - no deployment needed!
 
+## 🎯 What Does This dApp Do?
+
+This dApp provides two simple but useful utilities for ERC-7984 encrypted tokens:
+
+1. **Read Encrypted Tokens**: Connect your wallet, paste any encrypted ERC-7984 token address, and sign a decryption request with your wallet to view your encrypted balance.
+
+2. **Batch Encrypted Payments**: Send encrypted payments to up to 10 recipients (planning to scale this up eventually) with either:
+   - Same amount to all recipients
+   - Different amounts to each recipient
+
+   This facilitates efficient encrypted payments without revealing amounts on-chain.
+
 ---
 
-## 🚀 2-Step Setup (Using Deployed Contract)
+## 🚀 Local Build & Run
 
-### 1️⃣ Install & Generate
+Since the contract is already deployed and verified on [Sepolia](https://sepolia.etherscan.io/address/0x6c2C8A3Bd837f8F0c3286885ea17c17392af91df), you only need to build the frontend:
 
 ```bash
-pnpm install
-pnpm generate    # Generates TypeScript types from deployed contract
-```
-
-### 2️⃣ Start the App
-```bash
-pnpm start       # Opens http://localhost:3000
+pnpm install     # Install dependencies
+pnpm next:build  # Build the frontend
+pnpm start       # Start the app (opens http://localhost:3000)
 ```
 
 That's it! The app will connect to the already-deployed contract on Sepolia.
@@ -34,45 +44,6 @@ That's it! The app will connect to the already-deployed contract on Sepolia.
 4. **Add recipients** (one address per line)
 5. **Enter amount(s)**
 6. **Click "Send Batch Transfer"**
-
----
-
-## 🛠️ Optional: Local Development
-
-If you want to test locally with your own deployment:
-
-```bash
-# Terminal 1: Start local FHEVM node
-pnpm chain
-
-# Terminal 2: Deploy to localhost
-pnpm deploy:localhost
-pnpm generate
-
-# Terminal 3: Start frontend
-pnpm start
-```
-
----
-
-## 📋 Common Commands
-
-```bash
-# Development
-pnpm chain                    # Start local node
-pnpm deploy:localhost         # Deploy to localhost
-pnpm deploy:sepolia          # Deploy to Sepolia
-pnpm generate                # Generate TypeScript ABIs
-pnpm start                   # Start frontend
-
-# Testing
-pnpm hardhat:test            # Run all tests
-pnpm hardhat:test --grep "eBatcher"  # Run eBatcher tests only
-
-# Build
-pnpm compile                 # Compile contracts
-pnpm next:build             # Build frontend
-```
 
 ---
 
@@ -108,30 +79,7 @@ Amounts:
 ## ⚠️ Before You Start
 
 1. **Deploy an ERC-7984 Token** or use an existing one
-2. **Approve the Batcher Contract**:
-   ```javascript
-   await token.approve(eBatcherAddress, totalAmount);
-   ```
-3. **Have Testnet ETH** (for Sepolia) or use Hardhat accounts (localhost)
-
----
-
-## 🐛 Quick Troubleshooting
-
-| Problem | Solution |
-|---------|----------|
-| Import errors | `cd packages/hardhat && npm install` |
-| Nonce errors | MetaMask → Settings → Advanced → Clear Activity |
-| FHEVM not connected | Wait a few seconds for initialization |
-| Transaction fails | Check token approval first |
-
----
-
-## 📚 More Info
-
-- **Full Setup**: [EBATCHER_SETUP.md](./EBATCHER_SETUP.md)
-- **All Changes**: [INTEGRATION_SUMMARY.md](./INTEGRATION_SUMMARY.md)
-- **Deployed Contract** (Sepolia): `0x6c2C8A3Bd837f8F0c3286885ea17c17392af91df`
+2. **Have Testnet ETH** (for Sepolia) or use Hardhat accounts (localhost)
 
 ---
 
