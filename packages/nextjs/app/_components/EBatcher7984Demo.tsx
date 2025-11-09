@@ -101,6 +101,16 @@ export const EBatcher7984Demo = () => {
     eBatcher.decryptBalance();
   };
 
+  const handleSetOperator = async () => {
+    if (!tokenAddress) return;
+    await eBatcher.setOperator(tokenAddress);
+  };
+
+  const handleCheckOperator = async () => {
+    if (!tokenAddress || !address) return;
+    await eBatcher.checkOperatorStatus(tokenAddress, address);
+  };
+
   //////////////////////////////////////////////////////////////////////////////
   // UI Styling
   //////////////////////////////////////////////////////////////////////////////
@@ -229,6 +239,71 @@ export const EBatcher7984Demo = () => {
               <p className="text-[#cc0000] font-mono text-sm font-bold">{eBatcher.decryptionError}</p>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Operator Management */}
+      <div className={sectionClass}>
+        <h3 className={titleClass}>⚙️ Operator Setup (Required Once)</h3>
+
+        <div className="space-y-4">
+          <div className="border-2 border-[#0066cc] bg-[#e6f2ff] p-4">
+            <p className="text-black text-sm font-bold mb-2">ℹ️ What is an Operator?</p>
+            <p className="text-black text-xs">
+              The eBatcher contract needs to be approved as an &quot;operator&quot; to transfer ERC-7984 tokens on your behalf. 
+              This is a one-time setup per token contract and will remain active indefinitely.
+            </p>
+          </div>
+
+          {/* Token Address */}
+          <div>
+            <label className={labelClass}>ERC-7984 Token Address</label>
+            <input
+              type="text"
+              className={inputClass}
+              placeholder="0x..."
+              value={tokenAddress}
+              onChange={e => setTokenAddress(e.target.value)}
+            />
+          </div>
+
+          {/* Operator status display */}
+          {tokenAddress && address && eBatcher.operatorStatus[`${tokenAddress}-${address}`] !== undefined && (
+            <div className={`border-2 p-3 ${
+              eBatcher.operatorStatus[`${tokenAddress}-${address}`]
+                ? "border-[#008000] bg-[#f0fff0]"
+                : "border-[#cc6600] bg-[#fff8f0]"
+            }`}>
+              <p className="text-black text-sm font-bold">
+                {eBatcher.operatorStatus[`${tokenAddress}-${address}`]
+                  ? "✅ Operator Already Set"
+                  : "⚠️ Operator Not Set"}
+              </p>
+              <p className="text-black text-xs mt-1">
+                {eBatcher.operatorStatus[`${tokenAddress}-${address}`]
+                  ? "The batcher contract is approved. You can proceed with batch transfers."
+                  : "You need to set the batcher contract as operator before transferring tokens."}
+              </p>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex gap-4">
+            <button
+              className={secondaryButtonClass + " flex-1"}
+              disabled={!eBatcher.canInteract || !tokenAddress || eBatcher.isCheckingOperator}
+              onClick={handleCheckOperator}
+            >
+              {eBatcher.isCheckingOperator ? "⏳ Checking..." : "🔍 Check Operator Status"}
+            </button>
+            <button
+              className={primaryButtonClass + " flex-1"}
+              disabled={!eBatcher.canInteract || !tokenAddress || eBatcher.isCheckingOperator}
+              onClick={handleSetOperator}
+            >
+              {eBatcher.isCheckingOperator ? "⏳ Setting..." : "✅ Set Operator"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -380,14 +455,25 @@ export const EBatcher7984Demo = () => {
       <div className={sectionClass}>
         <h3 className={titleClass}>ℹ️ Instructions</h3>
         <div className="space-y-2 text-sm text-black font-medium">
-          <p>1. Enter the ERC-7984 token contract address you want to batch transfer</p>
-          <p>
+          <p className="font-bold text-[#cc0000]">⚠️ FIRST TIME SETUP (Required Once Per Token):</p>
+          <p className="ml-4">
+            • Enter your ERC-7984 token address in the &quot;Operator Setup&quot; section above
+          </p>
+          <p className="ml-4">
+            • Click &quot;Check Operator Status&quot; to verify if setup is needed
+          </p>
+          <p className="ml-4">
+            • If not set, click &quot;Set Operator&quot; to approve the batcher contract (one-time transaction)
+          </p>
+          <p className="mt-4 font-bold">📤 TO BATCH TRANSFER:</p>
+          <p className="ml-4">1. Enter the ERC-7984 token contract address (must have operator set)</p>
+          <p className="ml-4">
             2. Choose transfer mode: Same Amount (all recipients get the same) or Different Amounts (each gets a
             specific amount)
           </p>
-          <p>3. Enter recipient addresses (one per line)</p>
-          <p>4. Enter amount(s) - these will be encrypted using FHE</p>
-          <p>5. Click &quot;Send Batch Transfer&quot; to execute</p>
+          <p className="ml-4">3. Enter recipient addresses (one per line)</p>
+          <p className="ml-4">4. Enter amount(s) - these will be encrypted using FHE</p>
+          <p className="ml-4">5. Click &quot;Send Batch Transfer&quot; to execute</p>
         </div>
       </div>
     </div>

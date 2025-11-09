@@ -38,12 +38,30 @@ That's it! The app will connect to the already-deployed contract on Sepolia.
 
 ## 🎯 How to Use
 
+### First Time Setup (Required Once Per Token)
+
+Before you can batch transfer tokens, you need to approve the eBatcher contract as an operator:
+
 1. **Open** <http://localhost:3000>
 2. **Connect wallet** (switch to Sepolia testnet)
-3. **Enter token address** (your ERC-7984 token)
-4. **Add recipients** (one address per line)
-5. **Enter amount(s)**
-6. **Click "Send Batch Transfer"**
+3. **Navigate to "Operator Setup"** section
+4. **Enter your ERC-7984 token address**
+5. **Click "Check Operator Status"** to verify if setup is needed
+6. **Click "Set Operator"** if not already set (one-time transaction)
+
+✅ This approval is permanent - you only need to do it once per token contract!
+
+### Batch Transfer
+
+Once operator is set:
+
+1. **Enter token address** (same ERC-7984 token)
+2. **Add recipients** (one address per line, max 10)
+3. **Choose transfer mode** (same or different amounts)
+4. **Enter amount(s)**
+5. **Click "Send Batch Transfer"**
+
+The app will automatically verify operator status before each transfer.
 
 ---
 
@@ -79,7 +97,26 @@ Amounts:
 ## ⚠️ Before You Start
 
 1. **Deploy an ERC-7984 Token** or use an existing one
-2. **Have Testnet ETH** (for Sepolia) or use Hardhat accounts (localhost)
+2. **Have Testnet ETH** (for Sepolia) for:
+   - Setting operator approval (one-time, ~50k gas)
+   - Batch transfer transactions
+3. **Set the eBatcher as operator** (see "First Time Setup" above)
+
+---
+
+## 🔧 Technical Note: Operator Approval
+
+The eBatcher contract uses ERC-7984's operator pattern to transfer tokens on your behalf. When you "Set Operator", you're calling:
+
+```solidity
+eTokenContract.setOperator(batcherAddress, 0xFFFFFFFFFFFF)
+```
+
+This grants the batcher contract permanent approval to transfer your tokens. The approval:
+- Is checked automatically before each batch transfer
+- Remains active indefinitely (until = max uint48)
+- Is specific to each token contract address
+- Only allows the batcher to transfer **your** tokens (not anyone else's)
 
 ---
 

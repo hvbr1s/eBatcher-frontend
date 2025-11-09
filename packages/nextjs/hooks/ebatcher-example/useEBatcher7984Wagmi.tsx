@@ -47,6 +47,10 @@ export const useEBatcher7984Wagmi = (parameters: {
   const [balanceHandle, setBalanceHandle] = useState<string | null>(null);
   const [decryptedBalance, setDecryptedBalance] = useState<string | null>(null);
 
+  // Operator approval state
+  const [isCheckingOperator, setIsCheckingOperator] = useState<boolean>(false);
+  const [operatorStatus, setOperatorStatus] = useState<Record<string, boolean>>({});
+
   // Storage for decryption signatures
   const decryptionStorage = useMemo(() => new GenericStringInMemoryStorage(), []);
 
@@ -169,6 +173,117 @@ export const useEBatcher7984Wagmi = (parameters: {
   );
 
   /**
+   * Check if the batcher contract is set as an operator for the ERC-7984 token
+   */
+  const checkOperatorStatus = useCallback(
+    async (tokenAddress: string, ownerAddress: string): Promise<boolean> => {
+      if (!ethersReadonlyProvider || !eBatcher?.address) return false;
+
+      try {
+        const tokenContract = new ethers.Contract(
+          tokenAddress,
+          [
+            "function isOperator(address account, address operator) external view returns (bool)",
+          ],
+          ethersReadonlyProvider,
+        );
+
+        const isOperator = await tokenContract.isOperator(ownerAddress, eBatcher.address);
+        console.log("📝 Operator status:", {
+          token: tokenAddress,
+          owner: ownerAddress,
+          operator: eBatcher.address,
+          isOperator,
+        });
+
+        // Cache the result
+        setOperatorStatus(prev => ({
+          ...prev,
+          [`${tokenAddress}-${ownerAddress}`]: isOperator,
+        }));
+
+        return isOperator;
+      } catch (e) {
+        console.error("Failed to check operator status:", e);
+        return false;
+      }
+    },
+    [ethersReadonlyProvider, eBatcher?.address],
+  );
+
+  /**
+   * Set the batcher contract as an operator for the ERC-7984 token
+   */
+  const setOperator = useCallback(
+    async (tokenAddress: string) => {
+      if (!ethersSigner || !eBatcher?.address || !accounts || accounts.length === 0) {
+        setMessage("Signer or account not available");
+        return false;
+      }
+
+      setIsCheckingOperator(true);
+      setMessage("Setting batcher contract as operator...");
+
+      try {
+        const tokenContract = new ethers.Contract(
+          tokenAddress,
+          [
+            "function setOperator(address operator, uint48 until) external returns (bool)",
+          ],
+          ethersSigner,
+        );
+
+        // Set operator with maximum expiration time (permanent)
+        const until = 0xFFFFFFFFFFFF; // Max uint48 value
+        
+        console.log("📝 Setting operator:", {
+          token: tokenAddress,
+          operator: eBatcher.address,
+          until,
+        });
+
+        const tx = await tokenContract.setOperator(eBatcher.address, until);
+        const explorerUrl = chainId === 11155111 
+          ? `https://sepolia.etherscan.io/tx/${tx.hash}` 
+          : `https://etherscan.io/tx/${tx.hash}`;
+        
+        setMessage(`⏳ SetOperator transaction submitted!\nTX: ${tx.hash}\nView: ${explorerUrl}`);
+        
+        await tx.wait();
+        
+        setMessage(`✅ Operator set successfully! The batcher contract can now transfer your tokens.`);
+        
+        // Update cached operator status
+        setOperatorStatus(prev => ({
+          ...prev,
+          [`${tokenAddress}-${accounts[0]}`]: true,
+        }));
+
+        return true;
+      } catch (e: any) {
+        console.error("❌ Failed to set operator:", e);
+        
+        let errorMessage = "Failed to set operator: ";
+        if (e.reason) {
+          errorMessage += e.reason;
+        } else if (e.error?.message) {
+          errorMessage += e.error.message;
+        } else if (e.message) {
+          errorMessage += e.message;
+        } else {
+          errorMessage += String(e);
+        }
+        
+        setMessage(errorMessage);
+        return false;
+      } finally {
+        setIsCheckingOperator(false);
+      }
+    },
+    [ethersSigner, eBatcher?.address, accounts, chainId],
+  );
+
+  /**
    * Batch send the same token amount to multiple recipients
    */
   const batchSendTokenSameAmount = useCallback(
@@ -186,7 +301,23 @@ export const useEBatcher7984Wagmi = (parameters: {
       setIsProcessing(true);
       setMessage(`Starting batch transfer to ${recipients.length} recipients...`);
 
-      // Check token allowance (optional - some tokens may not support it)
+      // Check operator status for ERC-7984 tokens (REQUIRED)
+      if (accounts && accounts.length > 0) {
+        setMessage("Checking if batcher contract is set as operator...");
+        const isOperator = await checkOperatorStatus(tokenAddress, accounts[0]);
+        
+        if (!isOperator) {
+          setMessage(
+            `⚠️ Batcher contract is not set as operator!\n\nThe eBatcher contract needs to be approved as an operator to transfer tokens on your behalf.\n\nThis is a one-time setup. Click "Set Operator" below to approve.`,
+          );
+          setIsProcessing(false);
+          return;
+        }
+        
+        setMessage("✅ Operator status confirmed. Proceeding with batch transfer...");
+      }
+
+      // Check token allowance (optional - for backward compatibility with standard ERC-20)
       if (accounts && accounts.length > 0) {
         const allowance = await checkTokenAllowance(tokenAddress, accounts[0]);
         const totalAmount = amount * BigInt(recipients.length);
@@ -277,7 +408,7 @@ export const useEBatcher7984Wagmi = (parameters: {
         setIsProcessing(false);
       }
     },
-    [isProcessing, canInteract, maxBatchSize, encryptWith, getContract, eBatcher?.abi, accounts, checkTokenAllowance, chainId],
+    [isProcessing, canInteract, maxBatchSize, encryptWith, getContract, eBatcher?.abi, accounts, checkTokenAllowance, checkOperatorStatus, chainId],
   );
 
   /**
@@ -302,7 +433,23 @@ export const useEBatcher7984Wagmi = (parameters: {
       setIsProcessing(true);
       setMessage(`Starting batch transfer to ${recipients.length} recipients with different amounts...`);
 
-      // Check token allowance (optional - some tokens may not support it)
+      // Check operator status for ERC-7984 tokens (REQUIRED)
+      if (accounts && accounts.length > 0) {
+        setMessage("Checking if batcher contract is set as operator...");
+        const isOperator = await checkOperatorStatus(tokenAddress, accounts[0]);
+        
+        if (!isOperator) {
+          setMessage(
+            `⚠️ Batcher contract is not set as operator!\n\nThe eBatcher contract needs to be approved as an operator to transfer tokens on your behalf.\n\nThis is a one-time setup. Click "Set Operator" below to approve.`,
+          );
+          setIsProcessing(false);
+          return;
+        }
+        
+        setMessage("✅ Operator status confirmed. Proceeding with batch transfer...");
+      }
+
+      // Check token allowance (optional - for backward compatibility with standard ERC-20)
       if (accounts && accounts.length > 0) {
         const allowance = await checkTokenAllowance(tokenAddress, accounts[0]);
         const totalAmount = amounts.reduce((sum, amt) => sum + amt, BigInt(0));
@@ -392,7 +539,7 @@ export const useEBatcher7984Wagmi = (parameters: {
         setIsProcessing(false);
       }
     },
-    [isProcessing, canInteract, maxBatchSize, encryptWith, getContract, accounts, checkTokenAllowance, chainId],
+    [isProcessing, canInteract, maxBatchSize, encryptWith, getContract, accounts, checkTokenAllowance, checkOperatorStatus, chainId],
   );
 
   /**
@@ -572,6 +719,11 @@ export const useEBatcher7984Wagmi = (parameters: {
     balanceHandle,
     isDecryptingBalance: fheDecrypt.isDecrypting,
     decryptionError: fheDecrypt.error,
+    // Operator management
+    checkOperatorStatus,
+    setOperator,
+    isCheckingOperator,
+    operatorStatus,
     // Wagmi-specific values
     chainId,
     accounts,
