@@ -1,10 +1,12 @@
 # eBatcher7984 Quick Start Guide
 
-## 🌐 Live Deployment on Sepolia
+## 🌐 Live Deployment on Sepolia Testnet
 
 **Frontend:** [https://ebatcher-frontend.onrender.com](https://ebatcher-frontend.onrender.com)
 
-**Contract (Sepolia):** [`0x6c2C8A3Bd837f8F0c3286885ea17c17392af91df`](https://sepolia.etherscan.io/address/0x6c2C8A3Bd837f8F0c3286885ea17c17392af91df)
+**Contract (Sepolia - Upgradeable Proxy):** [`0xD49a2F55cDd08F5e248b68C2e0645B2bE6fb8Da9`](https://sepolia.etherscan.io/address/0xD49a2F55cDd08F5e248b68C2e0645B2bE6fb8Da9)
+
+**Implementation:** [`0xCA3CD61d243D5B08f342C304ADD03dF5859eb6f7`](https://sepolia.etherscan.io/address/0xCA3CD61d243D5B08f342C304ADD03dF5859eb6f7)
 
 You can start using the app immediately - no deployment needed!
 
@@ -14,7 +16,7 @@ This dApp provides two simple but useful utilities for ERC-7984 encrypted tokens
 
 1. **Read Encrypted Tokens**: Connect your wallet, paste any encrypted ERC-7984 token address, and sign a decryption request with your wallet to view your encrypted balance.
 
-2. **Batch Encrypted Payments**: Send encrypted payments to up to 10 recipients (planning to scale this up eventually) with either:
+2. **Batch Encrypted Payments**: Send encrypted payments to up to 20 recipients (planning to scale this up eventually) with either:
    - Same amount to all recipients
    - Different amounts to each recipient
 
@@ -24,7 +26,7 @@ This dApp provides two simple but useful utilities for ERC-7984 encrypted tokens
 
 ## 🚀 Local Build & Run
 
-Since the contract is already deployed and verified on [Sepolia](https://sepolia.etherscan.io/address/0x6c2C8A3Bd837f8F0c3286885ea17c17392af91df), you only need to build the frontend:
+Since the contract is already deployed and verified on [Sepolia](https://sepolia.etherscan.io/address/0xD49a2F55cDd08F5e248b68C2e0645B2bE6fb8Da9), you only need to build the frontend:
 
 ```bash
 pnpm install     # Install dependencies

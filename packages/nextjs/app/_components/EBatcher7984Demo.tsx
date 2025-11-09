@@ -24,12 +24,12 @@ export const EBatcher7984Demo = () => {
   // to ensure the SDK connects to the correct network for contract reads
   const provider = useMemo(() => {
     if (typeof window === "undefined") return undefined;
-    
+
     // If on Sepolia, use RPC URL string for proper network connection
     if (chainId === 11155111) {
       return "https://ethereum-sepolia-rpc.publicnode.com";
     }
-    
+
     // For other networks (like local hardhat), use wallet provider
     return (window as any).ethereum;
   }, [chainId]);
@@ -250,8 +250,8 @@ export const EBatcher7984Demo = () => {
           <div className="border-2 border-[#0066cc] bg-[#e6f2ff] p-4">
             <p className="text-black text-sm font-bold mb-2">ℹ️ What is an Operator?</p>
             <p className="text-black text-xs">
-              The eBatcher contract needs to be approved as an &quot;operator&quot; to transfer ERC-7984 tokens on your behalf. 
-              This is a one-time setup per token contract and will remain active indefinitely.
+              The eBatcher contract needs to be approved as an &quot;operator&quot; to transfer ERC-7984 tokens on your
+              behalf. This is a one-time setup per token contract and will remain active indefinitely.
             </p>
           </div>
 
@@ -269,11 +269,13 @@ export const EBatcher7984Demo = () => {
 
           {/* Operator status display */}
           {tokenAddress && address && eBatcher.operatorStatus[`${tokenAddress}-${address}`] !== undefined && (
-            <div className={`border-2 p-3 ${
-              eBatcher.operatorStatus[`${tokenAddress}-${address}`]
-                ? "border-[#008000] bg-[#f0fff0]"
-                : "border-[#cc6600] bg-[#fff8f0]"
-            }`}>
+            <div
+              className={`border-2 p-3 ${
+                eBatcher.operatorStatus[`${tokenAddress}-${address}`]
+                  ? "border-[#008000] bg-[#f0fff0]"
+                  : "border-[#cc6600] bg-[#fff8f0]"
+              }`}
+            >
               <p className="text-black text-sm font-bold">
                 {eBatcher.operatorStatus[`${tokenAddress}-${address}`]
                   ? "✅ Operator Already Set"
@@ -459,9 +461,7 @@ export const EBatcher7984Demo = () => {
           <p className="ml-4">
             • Enter your ERC-7984 token address in the &quot;Operator Setup&quot; section above
           </p>
-          <p className="ml-4">
-            • Click &quot;Check Operator Status&quot; to verify if setup is needed
-          </p>
+          <p className="ml-4">• Click &quot;Check Operator Status&quot; to verify if setup is needed</p>
           <p className="ml-4">
             • If not set, click &quot;Set Operator&quot; to approve the batcher contract (one-time transaction)
           </p>
@@ -524,4 +524,3 @@ function printBooleanProperty(name: string, value: boolean) {
     </div>
   );
 }
-
