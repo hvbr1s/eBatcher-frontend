@@ -31,7 +31,7 @@ export const FHECounterDemo = () => {
     if (chainId === 11155111) {
       return "https://ethereum-sepolia-rpc.publicnode.com";
     }
-    
+
     // For other networks (like local hardhat), use wallet provider
     return (window as any).ethereum;
   }, [chainId]);
