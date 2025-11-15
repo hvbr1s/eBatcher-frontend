@@ -1,0 +1,310 @@
+/* Windows 95 Inspired Styles - Black on White */
+/* Based on minimalist design with high contrast */
+
+:root {
+  --win98-bg: #ffffff;
+  --win98-light: #ffffff;
+  --win98-dark: #000000;
+  --win98-darker: #000000;
+  --win98-white: #ffffff;
+  --win98-black: #000000;
+  --win98-blue: #000000;
+  --win98-title-bar: #000000;
+  --win98-title-text: #ffffff;
+  --win98-button-face: silver;
+  --win98-selected: #000000;
+  --win98-selected-text: #ffffff;
+}
+
+/* Window Container */
+.window {
+  background: white;
+  border: 2px solid black;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+  font-family: "MS Sans Serif", "Microsoft Sans Serif", sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Title Bar */
+.title-bar {
+  background: black;
+  color: white;
+  padding: 3px 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+}
+
+.title-bar-text {
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.title-bar-controls {
+  display: flex;
+  gap: 2px;
+}
+
+.title-bar-controls button {
+  width: 16px;
+  height: 14px;
+  padding: 0;
+  border: 1px solid black;
+  background: silver;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+/* Window Body */
+.window-body {
+  padding: 15px;
+  background: white;
+}
+
+/* Fieldset */
+fieldset {
+  border: 2px groove white;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: white;
+}
+
+legend {
+  padding: 0 5px;
+  font-weight: bold;
+  color: black;
+}
+
+/* Field Row */
+.field-row {
+  margin-bottom: 10px;
+}
+
+.field-row label {
+  display: block;
+  margin-bottom: 3px;
+  font-weight: bold;
+  color: black;
+}
+
+/* Inputs */
+input[type="text"],
+textarea {
+  padding: 3px;
+  border: 2px solid;
+  border-color: black white white black;
+  font-family: inherit;
+  font-size: 11px;
+  background: white;
+  color: black;
+}
+
+textarea {
+  resize: vertical;
+  font-family: "Courier New", monospace;
+}
+
+/* Buttons */
+.btn, button {
+  padding: 4px 12px;
+  background: silver;
+  border: 2px solid;
+  border-color: white black black white;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  color: black;
+}
+
+.btn:active, button:active {
+  border-color: black white white black;
+  padding: 5px 11px 3px 13px;
+}
+
+.btn:disabled, button:disabled {
+  color: gray;
+  cursor: not-allowed;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  border-bottom: 2px solid black;
+  margin-bottom: 15px;
+  background: white;
+}
+
+.tab-button {
+  padding: 6px 12px;
+  background: silver;
+  border: 2px solid;
+  border-color: white black black white;
+  border-bottom: none;
+  cursor: pointer;
+  margin-right: 2px;
+  color: black;
+  font-weight: normal;
+}
+
+.tab-button.active {
+  background: white;
+  border-bottom: 2px solid white;
+  margin-bottom: -2px;
+  font-weight: bold;
+}
+
+.tab-content {
+  display: none;
+  padding: 12px 0;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Status Bar */
+.status-bar {
+  border-top: 2px solid black;
+  padding: 3px;
+  display: flex;
+  gap: 5px;
+  margin-top: 15px;
+  background: silver;
+}
+
+.status-bar-field {
+  padding: 2px 5px;
+  border: 2px solid;
+  border-color: black white white black;
+  margin: 0;
+  font-size: 10px;
+  background: white;
+  color: black;
+}
+
+/* Result Box */
+.result-box {
+  margin-top: 10px;
+  padding: 10px;
+  border: 2px solid;
+  border-color: black white white black;
+  background: white;
+  min-height: 60px;
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: black;
+}
+
+.result-box:empty {
+  display: none;
+}
+
+/* Sunken Panel (for data display) */
+.sunken-panel {
+  border: 2px solid;
+  border-color: black white white black;
+  padding: 8px;
+  background: white;
+}
+
+/* Raised Panel */
+.raised-panel {
+  border: 2px solid;
+  border-color: white black black white;
+  padding: 8px;
+  background: silver;
+}
+
+/* Info Box */
+.info-box {
+  background: white;
+  border: 2px solid black;
+  padding: 8px;
+  margin: 8px 0;
+}
+
+.info-box.info {
+  background: #f0f0f0;
+}
+
+.info-box.warning {
+  background: #fff8dc;
+}
+
+.info-box.error {
+  background: #ffebe9;
+}
+
+.info-box.success {
+  background: #e6ffe6;
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.mb-1 { margin-bottom: 4px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 16px; }
+
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mt-4 { margin-top: 16px; }
+
+.w-full { width: 100%; }
+
+/* Grid Layout */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Property Display */
+.property-display {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 6px;
+  background: white;
+  border: 2px solid;
+  border-color: black white white black;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.property-label {
+  font-weight: bold;
+  color: black;
+}
+
+.property-value {
+  font-family: "Courier New", monospace;
+  color: black;
+}
+
+/* Success/Error styling */
+.success {
+  color: green;
+}
+
+.error {
+  color: red;
+}
+
+.warning {
+  color: #cc6600;
+}
+
+/* Utility */
+small {
+  font-size: 9px;
+  color: #333;
+}
+
