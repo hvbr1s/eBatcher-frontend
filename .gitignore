@@ -10,3 +10,4 @@ packages/*/coverage
 tmp*
 .vscode
 FHEVM_SEPOLIA_FIX.md
+migration_guide
