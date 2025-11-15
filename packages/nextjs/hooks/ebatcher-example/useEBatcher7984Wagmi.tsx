@@ -4,12 +4,12 @@ import { useCallback, useMemo, useState } from "react";
 import { useDeployedContractInfo } from "../helper";
 import { useWagmiEthers } from "../wagmi/useWagmiEthers";
 import { FhevmInstance } from "@fhevm-sdk";
-import { buildParamsFromAbi, getEncryptionMethod, toHex, useFHEEncryption, useFHEDecrypt } from "@fhevm-sdk";
+import { buildParamsFromAbi, getEncryptionMethod, toHex, useFHEDecrypt, useFHEEncryption } from "@fhevm-sdk";
 import { GenericStringInMemoryStorage } from "@fhevm-sdk";
 import { ethers } from "ethers";
+import { useReadContract } from "wagmi";
 import type { Contract } from "~~/utils/helper/contract";
 import type { AllowedChainIds } from "~~/utils/helper/networks";
-import { useReadContract } from "wagmi";
 
 /**
  * useEBatcher7984Wagmi - Hook for interacting with eBatcher7984 contract
@@ -148,9 +148,7 @@ export const useEBatcher7984Wagmi = (parameters: {
       try {
         const tokenContract = new ethers.Contract(
           tokenAddress,
-          [
-            "function allowance(address owner, address spender) external view returns (uint256)",
-          ],
+          ["function allowance(address owner, address spender) external view returns (uint256)"],
           ethersReadonlyProvider,
         );
 
@@ -182,9 +180,7 @@ export const useEBatcher7984Wagmi = (parameters: {
       try {
         const tokenContract = new ethers.Contract(
           tokenAddress,
-          [
-            "function isOperator(address account, address operator) external view returns (bool)",
-          ],
+          ["function isOperator(address account, address operator) external view returns (bool)"],
           ethersReadonlyProvider,
         );
 
@@ -227,15 +223,13 @@ export const useEBatcher7984Wagmi = (parameters: {
       try {
         const tokenContract = new ethers.Contract(
           tokenAddress,
-          [
-            "function setOperator(address operator, uint48 until) external returns (bool)",
-          ],
+          ["function setOperator(address operator, uint48 until) external returns (bool)"],
           ethersSigner,
         );
 
         // Set operator with maximum expiration time (permanent)
-        const until = 0xFFFFFFFFFFFF; // Max uint48 value
-        
+        const until = 0xffffffffffff; // Max uint48 value
+
         console.log("📝 Setting operator:", {
           token: tokenAddress,
           operator: eBatcher.address,
@@ -243,16 +237,15 @@ export const useEBatcher7984Wagmi = (parameters: {
         });
 
         const tx = await tokenContract.setOperator(eBatcher.address, until);
-        const explorerUrl = chainId === 11155111 
-          ? `https://sepolia.etherscan.io/tx/${tx.hash}` 
-          : `https://etherscan.io/tx/${tx.hash}`;
-        
+        const explorerUrl =
+          chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
+
         setMessage(`⏳ SetOperator transaction submitted!\nTX: ${tx.hash}\nView: ${explorerUrl}`);
-        
+
         await tx.wait();
-        
+
         setMessage(`✅ Operator set successfully! The batcher contract can now transfer your tokens.`);
-        
+
         // Update cached operator status
         setOperatorStatus(prev => ({
           ...prev,
@@ -262,7 +255,7 @@ export const useEBatcher7984Wagmi = (parameters: {
         return true;
       } catch (e: any) {
         console.error("❌ Failed to set operator:", e);
-        
+
         let errorMessage = "Failed to set operator: ";
         if (e.reason) {
           errorMessage += e.reason;
@@ -273,7 +266,7 @@ export const useEBatcher7984Wagmi = (parameters: {
         } else {
           errorMessage += String(e);
         }
-        
+
         setMessage(errorMessage);
         return false;
       } finally {
@@ -305,7 +298,7 @@ export const useEBatcher7984Wagmi = (parameters: {
       if (accounts && accounts.length > 0) {
         setMessage("Checking if batcher contract is set as operator...");
         const isOperator = await checkOperatorStatus(tokenAddress, accounts[0]);
-        
+
         if (!isOperator) {
           setMessage(
             `⚠️ Batcher contract is not set as operator!\n\nThe eBatcher contract needs to be approved as an operator to transfer tokens on your behalf.\n\nThis is a one-time setup. Click "Set Operator" below to approve.`,
@@ -313,7 +306,7 @@ export const useEBatcher7984Wagmi = (parameters: {
           setIsProcessing(false);
           return;
         }
-        
+
         setMessage("✅ Operator status confirmed. Proceeding with batch transfer...");
       }
 
@@ -372,10 +365,15 @@ export const useEBatcher7984Wagmi = (parameters: {
 
         setMessage("Sending transaction...");
         const tx = await writeContract.batchSendTokenSameAmount(...params);
-        const explorerUrl = chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
-        setMessage(`⏳ Transaction submitted!\nTX: ${tx.hash}\nWaiting for block confirmation...\nView: ${explorerUrl}`);
+        const explorerUrl =
+          chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
+        setMessage(
+          `⏳ Transaction submitted!\nTX: ${tx.hash}\nWaiting for block confirmation...\nView: ${explorerUrl}`,
+        );
         const receipt = await tx.wait(2); // Wait for 2 confirmations
-        setMessage(`✅ Confirmed! Sent ${amount.toString()} tokens to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`);
+        setMessage(
+          `✅ Confirmed! Sent ${amount.toString()} tokens to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`,
+        );
       } catch (e: any) {
         console.error("❌ Batch transfer error:", e);
 
@@ -408,7 +406,18 @@ export const useEBatcher7984Wagmi = (parameters: {
         setIsProcessing(false);
       }
     },
-    [isProcessing, canInteract, maxBatchSize, encryptWith, getContract, eBatcher?.abi, accounts, checkTokenAllowance, checkOperatorStatus, chainId],
+    [
+      isProcessing,
+      canInteract,
+      maxBatchSize,
+      encryptWith,
+      getContract,
+      eBatcher?.abi,
+      accounts,
+      checkTokenAllowance,
+      checkOperatorStatus,
+      chainId,
+    ],
   );
 
   /**
@@ -437,7 +446,7 @@ export const useEBatcher7984Wagmi = (parameters: {
       if (accounts && accounts.length > 0) {
         setMessage("Checking if batcher contract is set as operator...");
         const isOperator = await checkOperatorStatus(tokenAddress, accounts[0]);
-        
+
         if (!isOperator) {
           setMessage(
             `⚠️ Batcher contract is not set as operator!\n\nThe eBatcher contract needs to be approved as an operator to transfer tokens on your behalf.\n\nThis is a one-time setup. Click "Set Operator" below to approve.`,
@@ -445,7 +454,7 @@ export const useEBatcher7984Wagmi = (parameters: {
           setIsProcessing(false);
           return;
         }
-        
+
         setMessage("✅ Operator status confirmed. Proceeding with batch transfer...");
       }
 
@@ -503,10 +512,15 @@ export const useEBatcher7984Wagmi = (parameters: {
           encryptedHandles, // All encrypted handles from single encryption
           inputProof, // Single shared input proof
         );
-        const explorerUrl = chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
-        setMessage(`⏳ Transaction submitted!\nTX: ${tx.hash}\nWaiting for block confirmation...\nView: ${explorerUrl}`);
+        const explorerUrl =
+          chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
+        setMessage(
+          `⏳ Transaction submitted!\nTX: ${tx.hash}\nWaiting for block confirmation...\nView: ${explorerUrl}`,
+        );
         const receipt = await tx.wait(2); // Wait for 2 confirmations
-        setMessage(`✅ Confirmed! Sent different amounts to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`);
+        setMessage(
+          `✅ Confirmed! Sent different amounts to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`,
+        );
       } catch (e: any) {
         console.error("❌ Batch transfer error:", e);
 
@@ -539,7 +553,17 @@ export const useEBatcher7984Wagmi = (parameters: {
         setIsProcessing(false);
       }
     },
-    [isProcessing, canInteract, maxBatchSize, encryptWith, getContract, accounts, checkTokenAllowance, checkOperatorStatus, chainId],
+    [
+      isProcessing,
+      canInteract,
+      maxBatchSize,
+      encryptWith,
+      getContract,
+      accounts,
+      checkTokenAllowance,
+      checkOperatorStatus,
+      chainId,
+    ],
   );
 
   /**
@@ -581,9 +605,7 @@ export const useEBatcher7984Wagmi = (parameters: {
 
         const tokenContract = new ethers.Contract(
           tokenAddress,
-          [
-            "function confidentialBalanceOf(address account) external view returns (bytes32)",
-          ],
+          ["function confidentialBalanceOf(address account) external view returns (bytes32)"],
           ethersReadonlyProvider,
         );
 
@@ -690,10 +712,15 @@ export const useEBatcher7984Wagmi = (parameters: {
 
         setMessage("Sending transaction...");
         const tx = await writeContract.tokenRescue(...params);
-        const explorerUrl = chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
-        setMessage(`⏳ Transaction submitted!\nTX: ${tx.hash}\nWaiting for block confirmation...\nView: ${explorerUrl}`);
+        const explorerUrl =
+          chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
+        setMessage(
+          `⏳ Transaction submitted!\nTX: ${tx.hash}\nWaiting for block confirmation...\nView: ${explorerUrl}`,
+        );
         const receipt = await tx.wait(2); // Wait for 2 confirmations
-        setMessage(`✅ Confirmed! Rescued ${amount.toString()} tokens to ${recipient}.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`);
+        setMessage(
+          `✅ Confirmed! Rescued ${amount.toString()} tokens to ${recipient}.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`,
+        );
       } catch (e) {
         setMessage(`Token rescue failed: ${e instanceof Error ? e.message : String(e)}`);
       } finally {
@@ -731,5 +758,3 @@ export const useEBatcher7984Wagmi = (parameters: {
     ethersSigner,
   };
 };
-
-
