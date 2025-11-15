@@ -155,7 +155,7 @@ export const EBatcher7984Demo = () => {
         <fieldset className="mb-3">
           <legend>Configuration</legend>
           <div className="field-row">
-            <label htmlFor="tokenAddress">Token Address:</label>
+            <label htmlFor="tokenAddress">ERC-7984 Token Address:</label>
             <input
               id="tokenAddress"
               type="text"
@@ -165,9 +165,8 @@ export const EBatcher7984Demo = () => {
               style={{ width: "100%", padding: "5px" }}
             />
           </div>
-          <div className="field-row" style={{ fontSize: "10px", color: "#666" }}>
-            <span>Contract: {eBatcher.contractAddress || "Not deployed"}</span>
-            <span>Max Batch: {eBatcher.maxBatchSize}</span>
+          <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
+            Enter the address of an ERC-7984 token (encrypted token standard)
           </div>
         </fieldset>
 
@@ -429,16 +428,16 @@ export const EBatcher7984Demo = () => {
           <legend>Status</legend>
           <div style={{ fontSize: "10px", display: "flex", gap: "16px", flexWrap: "wrap" }}>
             <span>
-              <strong>FHEVM:</strong> {fhevmInstance ? "✓" : "✗"}
-            </span>
-            <span>
               <strong>Processing:</strong> {eBatcher.isProcessing ? "Yes" : "No"}
             </span>
             <span>
-              <strong>Max Batch:</strong> {eBatcher.maxBatchSize}
+              <strong>Max Batch Size:</strong> {eBatcher.maxBatchSize}
             </span>
             <span>
-              <strong>Chain:</strong> {eBatcher.chainId ?? "N/A"}
+              <strong>Batcher Contract:</strong>{" "}
+              {eBatcher.contractAddress
+                ? `${eBatcher.contractAddress.slice(0, 6)}...${eBatcher.contractAddress.slice(-4)}`
+                : "Not deployed"}
             </span>
           </div>
         </fieldset>
