@@ -116,11 +116,6 @@ export const EBatcher7984Demo = () => {
       <div className="window" style={{ maxWidth: "500px", margin: "0 auto" }}>
         <div className="title-bar">
           <div className="title-bar-text">Connection Required</div>
-          <div className="title-bar-controls">
-            <button aria-label="Minimize"></button>
-            <button aria-label="Maximize"></button>
-            <button aria-label="Close"></button>
-          </div>
         </div>
         <div className="window-body text-center">
           <div style={{ margin: "20px 0" }}>
@@ -138,11 +133,6 @@ export const EBatcher7984Demo = () => {
     <div className="window">
       <div className="title-bar">
         <div className="title-bar-text">eBatcher - Encrypted Batch Transfer</div>
-        <div className="title-bar-controls">
-          <button aria-label="Minimize"></button>
-          <button aria-label="Maximize"></button>
-          <button aria-label="Close"></button>
-        </div>
       </div>
 
       <div className="window-body">
@@ -436,7 +426,7 @@ export const EBatcher7984Demo = () => {
             <span>
               <strong>Batcher Contract:</strong>{" "}
               {eBatcher.contractAddress
-                ? `${eBatcher.contractAddress.slice(0, 6)}...${eBatcher.contractAddress.slice(-4)}`
+                ? `${eBatcher.contractAddress}`
                 : "Not deployed"}
             </span>
           </div>
