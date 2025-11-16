@@ -211,7 +211,7 @@ export const useEBatcher7984Wagmi = (parameters: {
    * Set the batcher contract as an operator for the ERC-7984 token
    */
   const setOperator = useCallback(
-    async (tokenAddress: string) => {
+    async (tokenAddress: string, until?: string | number | bigint) => {
       if (!ethersSigner || !eBatcher?.address || !accounts || accounts.length === 0) {
         setMessage("Signer or account not available");
         return false;
@@ -227,16 +227,16 @@ export const useEBatcher7984Wagmi = (parameters: {
           ethersSigner,
         );
 
-        // Set operator with maximum expiration time (permanent)
-        const until = 0xffffffffffff; // Max uint48 value
+        // Set operator with provided expiration time or default to maximum (permanent)
+        const untilValue = until !== undefined ? BigInt(until) : 0xffffffffffffn; // Max uint48 value
 
         console.log("📝 Setting operator:", {
           token: tokenAddress,
           operator: eBatcher.address,
-          until,
+          until: untilValue,
         });
 
-        const tx = await tokenContract.setOperator(eBatcher.address, until);
+        const tx = await tokenContract.setOperator(eBatcher.address, untilValue);
         const explorerUrl =
           chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${tx.hash}` : `https://etherscan.io/tx/${tx.hash}`;
 
