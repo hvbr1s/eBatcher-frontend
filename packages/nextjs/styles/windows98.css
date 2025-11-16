@@ -42,21 +42,6 @@
   letter-spacing: 0.5px;
 }
 
-.title-bar-controls {
-  display: flex;
-  gap: 2px;
-}
-
-.title-bar-controls button {
-  width: 16px;
-  height: 14px;
-  padding: 0;
-  border: 1px solid black;
-  background: silver;
-  font-size: 8px;
-  cursor: pointer;
-}
-
 /* Window Body */
 .window-body {
   padding: 15px;

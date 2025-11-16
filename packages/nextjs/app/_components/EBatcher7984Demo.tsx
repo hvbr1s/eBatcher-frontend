@@ -61,7 +61,7 @@ export const EBatcher7984Demo = () => {
   const [recipientsText, setRecipientsText] = useState<string>("");
   const [sameAmount, setSameAmount] = useState<string>("100000000");
   const [differentAmountsText, setDifferentAmountsText] = useState<string>("");
-  const [operatorUntil] = useState<string>("281474976710655");
+  const [operatorUntil, setOperatorUntil] = useState<string>("281474976710655");
 
   //////////////////////////////////////////////////////////////////////////////
   // Handlers
@@ -108,7 +108,7 @@ export const EBatcher7984Demo = () => {
 
   const handleSetOperator = async () => {
     if (!tokenAddress) return;
-    await eBatcher.setOperator(tokenAddress);
+    await eBatcher.setOperator(tokenAddress, operatorUntil);
   };
 
   if (!isConnected) {
@@ -116,11 +116,6 @@ export const EBatcher7984Demo = () => {
       <div className="window" style={{ maxWidth: "500px", margin: "0 auto" }}>
         <div className="title-bar">
           <div className="title-bar-text">Connection Required</div>
-          <div className="title-bar-controls">
-            <button aria-label="Minimize"></button>
-            <button aria-label="Maximize"></button>
-            <button aria-label="Close"></button>
-          </div>
         </div>
         <div className="window-body text-center">
           <div style={{ margin: "20px 0" }}>
@@ -138,11 +133,6 @@ export const EBatcher7984Demo = () => {
     <div className="window">
       <div className="title-bar">
         <div className="title-bar-text">eBatcher - Encrypted Batch Transfer</div>
-        <div className="title-bar-controls">
-          <button aria-label="Minimize"></button>
-          <button aria-label="Maximize"></button>
-          <button aria-label="Close"></button>
-        </div>
       </div>
 
       <div className="window-body">
@@ -280,9 +270,17 @@ export const EBatcher7984Demo = () => {
 
             <div className="field-row">
               <label htmlFor="operatorUntil">Valid Until (timestamp):</label>
-              <input id="operatorUntil" type="text" value={operatorUntil} disabled />
+              <input
+                id="operatorUntil"
+                type="text"
+                value={operatorUntil}
+                onChange={e => setOperatorUntil(e.target.value)}
+                style={{ width: "100%", padding: "5px" }}
+              />
             </div>
-            <div style={{ fontSize: "10px", color: "#666", marginBottom: "8px" }}>Default: max uint48 (permanent)</div>
+            <div style={{ fontSize: "10px", color: "#666", marginBottom: "8px" }}>
+              Default: 281474976710655 (max uint48 - permanent approval)
+            </div>
 
             {/* Operator status display */}
             {tokenAddress && address && eBatcher.operatorStatus[`${tokenAddress}-${address}`] !== undefined && (
@@ -436,7 +434,7 @@ export const EBatcher7984Demo = () => {
             <span>
               <strong>Batcher Contract:</strong>{" "}
               {eBatcher.contractAddress
-                ? `${eBatcher.contractAddress.slice(0, 6)}...${eBatcher.contractAddress.slice(-4)}`
+                ? `${eBatcher.contractAddress}`
                 : "Not deployed"}
             </span>
           </div>
