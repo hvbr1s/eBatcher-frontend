@@ -365,8 +365,8 @@ export const EWETHDemo = () => {
               <strong>Decrypting:</strong> {eWETHHook.isDecrypting ? "Yes" : "No"}
             </span>
             <span>
-              <strong>Contract:</strong>{" "}
-              {eWETH?.address ? `${eWETH.address.slice(0, 6)}...${eWETH.address.slice(-4)}` : "Not deployed"}
+              <strong>eWETH Contract:</strong>{" "}
+              {eWETH?.address ? `${eWETH.address}` : "Not deployed"}
             </span>
           </div>
         </fieldset>
