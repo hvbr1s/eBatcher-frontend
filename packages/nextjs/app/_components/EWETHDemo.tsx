@@ -132,42 +132,25 @@ export const EWETHDemo = () => {
           <RainbowKitCustomConnectButton />
         </div>
 
-        {/* Info Box */}
-        <fieldset className="mb-3">
-          <legend>About eWETH</legend>
-          <div style={{ fontSize: "11px", lineHeight: "1.6" }}>
-            <p style={{ marginBottom: "8px" }}>
-              <strong>eWETH</strong> is an encrypted wrapped ETH token (ERC-7984) that allows you to:
-            </p>
-            <ul style={{ marginLeft: "20px", marginBottom: "8px" }}>
-              <li>Wrap ETH into encrypted eWETH tokens</li>
-              <li>Unwrap eWETH back to ETH</li>
-            </ul>
-            <p style={{ fontSize: "10px", color: "#666" }}>
-              Contract: {eWETH?.address ? `${eWETH.address.slice(0, 6)}...${eWETH.address.slice(-4)}` : "Not deployed"}
-            </p>
-          </div>
-        </fieldset>
-
         {/* Tabs */}
         <div className="tabs">
           <button
             className={`tab-button ${activeTab === "deposit" ? "active" : ""}`}
             onClick={() => setActiveTab("deposit")}
           >
-            Deposit ETH
+            Wrap ETH
           </button>
           <button
             className={`tab-button ${activeTab === "withdraw" ? "active" : ""}`}
             onClick={() => setActiveTab("withdraw")}
           >
-            Withdraw ETH
+            Unwrap ETH
           </button>
           <button
             className={`tab-button ${activeTab === "balance" ? "active" : ""}`}
             onClick={() => setActiveTab("balance")}
           >
-            Check Balance
+            Check eWETH Balance
           </button>
         </div>
 
