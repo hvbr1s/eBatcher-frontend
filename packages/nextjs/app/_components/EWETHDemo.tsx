@@ -141,8 +141,7 @@ export const EWETHDemo = () => {
             </p>
             <ul style={{ marginLeft: "20px", marginBottom: "8px" }}>
               <li>Wrap ETH into encrypted eWETH tokens</li>
-              <li>Transfer eWETH with encrypted amounts</li>
-              <li>Unwrap eWETH back to ETH using FHEVM v0.9 user decryption</li>
+              <li>Unwrap eWETH back to ETH</li>
             </ul>
             <p style={{ fontSize: "10px", color: "#666" }}>
               Contract: {eWETH?.address ? `${eWETH.address.slice(0, 6)}...${eWETH.address.slice(-4)}` : "Not deployed"}
