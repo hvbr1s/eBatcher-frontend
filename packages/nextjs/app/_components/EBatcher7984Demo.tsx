@@ -433,9 +433,7 @@ export const EBatcher7984Demo = () => {
             </span>
             <span>
               <strong>Batcher Contract:</strong>{" "}
-              {eBatcher.contractAddress
-                ? `${eBatcher.contractAddress}`
-                : "Not deployed"}
+              {eBatcher.contractAddress ? `${eBatcher.contractAddress}` : "Not deployed"}
             </span>
           </div>
         </fieldset>

@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useWagmiEthers } from "../wagmi/useWagmiEthers";
 import { FhevmInstance } from "@fhevm-sdk";
-import { useFHEDecrypt, useFHEEncryption } from "@fhevm-sdk";
-import { GenericStringInMemoryStorage } from "@fhevm-sdk";
+import { useFHEEncryption } from "@fhevm-sdk";
 import { ethers } from "ethers";
 import { useAccount } from "wagmi";
 
@@ -54,36 +53,9 @@ export const useEWETHWagmi = (parameters: {
   // Withdrawal state
   const [pendingWithdrawalHandle, setPendingWithdrawalHandle] = useState<string | null>(null);
 
-  // Storage for decryption signatures
-  const decryptionStorage = useMemo(() => new GenericStringInMemoryStorage(), []);
-
-  // Setup FHE decryption for balance
-  const balanceDecryptRequests = useMemo(() => {
-    if (!balanceHandle || !contractAddress) return undefined;
-    return [{ handle: balanceHandle, contractAddress: contractAddress as `0x${string}` }];
-  }, [balanceHandle, contractAddress]);
-
-  const balanceFheDecrypt = useFHEDecrypt({
-    instance,
-    ethersSigner: ethersSigner as any,
-    fhevmDecryptionSignatureStorage: decryptionStorage,
-    chainId,
-    requests: balanceDecryptRequests,
-  });
-
-  // Setup FHE decryption for withdrawal
-  const withdrawalDecryptRequests = useMemo(() => {
-    if (!pendingWithdrawalHandle || !contractAddress) return undefined;
-    return [{ handle: pendingWithdrawalHandle, contractAddress: contractAddress as `0x${string}` }];
-  }, [pendingWithdrawalHandle, contractAddress]);
-
-  const withdrawalFheDecrypt = useFHEDecrypt({
-    instance,
-    ethersSigner: ethersSigner as any,
-    fhevmDecryptionSignatureStorage: decryptionStorage,
-    chainId,
-    requests: withdrawalDecryptRequests,
-  });
+  // Note: We use PUBLIC decryption for both balance and withdrawal
+  // because the contract calls makeBalancePubliclyDecryptable() and
+  // the withdrawal handle is meant to be publicly decrypted
 
   // Encryption hook
   const { encryptWith } = useFHEEncryption({
@@ -92,7 +64,6 @@ export const useEWETHWagmi = (parameters: {
     contractAddress: contractAddress as `0x${string}`,
   });
 
-  const hasProvider = Boolean(ethersReadonlyProvider);
   const hasSigner = Boolean(ethersSigner);
   const hasContract = Boolean(contractAddress && ethers.isAddress(contractAddress));
 
@@ -227,22 +198,71 @@ export const useEWETHWagmi = (parameters: {
   );
 
   /**
-   * Complete withdrawal (step 2 of 2)
+   * Complete withdrawal (step 2 of 2) - Uses PUBLIC decryption
    */
-  const completeWithdrawal = useCallback(() => {
+  const completeWithdrawal = useCallback(async () => {
     if (!pendingWithdrawalHandle) {
       setMessage("❌ No pending withdrawal");
       return;
     }
 
-    if (!withdrawalFheDecrypt.canDecrypt) {
-      setMessage("❌ Cannot decrypt: missing handle or FHEVM instance");
+    if (!instance) {
+      setMessage("❌ Cannot decrypt: FHEVM instance not available");
       return;
     }
 
-    setMessage("🔓 Decrypting withdrawal amount...");
-    withdrawalFheDecrypt.decrypt();
-  }, [pendingWithdrawalHandle, withdrawalFheDecrypt]);
+    const contract = getContract("write");
+    if (!contract) {
+      setMessage("❌ Contract not available");
+      return;
+    }
+
+    setIsProcessing(true);
+    setIsDecrypting(true);
+    setMessage("🔓 Performing public decryption...");
+
+    try {
+      // Use public decryption (the contract called makeBalancePubliclyDecryptable)
+      const decryptionResult = await instance.publicDecrypt([pendingWithdrawalHandle]);
+
+      console.log("🔓 Public decryption result:", decryptionResult);
+
+      // Get the cleartext value for this handle
+      const cleartextValue = decryptionResult.clearValues[pendingWithdrawalHandle as `0x${string}`];
+      if (!cleartextValue) {
+        throw new Error(`No cleartext value found for handle ${pendingWithdrawalHandle}`);
+      }
+
+      console.log("🔓 Decrypted amount:", cleartextValue.toString(), "wei");
+      setMessage(
+        `✅ Amount decrypted: ${ethers.formatEther(cleartextValue.toString())} ETH\n🔹 Completing withdrawal with proof verification...`,
+      );
+
+      // Complete the withdrawal with the decrypted value and proof
+      const completeTx = await contract.completeWithdrawal!(
+        pendingWithdrawalHandle,
+        decryptionResult.abiEncodedClearValues,
+        decryptionResult.decryptionProof,
+      );
+
+      setMessage(`🔗 Transaction sent: ${completeTx.hash}\nWaiting for confirmation...`);
+
+      const completeReceipt = await completeTx.wait();
+
+      setMessage(`✅ Withdrawal complete!\nETH transferred to your wallet.\nBlock: ${completeReceipt.blockNumber}`);
+
+      // Reset state
+      setPendingWithdrawalHandle(null);
+      setBalanceHandle(null);
+      setDecryptedBalance(null);
+    } catch (error: any) {
+      console.error("Complete withdrawal error:", error);
+      setMessage(`❌ Failed to complete withdrawal: ${error.message || error}`);
+    } finally {
+      setIsProcessing(false);
+      setIsDecrypting(false);
+    }
+  }, [pendingWithdrawalHandle, instance]);
 
   /**
    * Get encrypted balance and make it publicly decryptable
@@ -286,91 +306,48 @@ export const useEWETHWagmi = (parameters: {
   }, [canInteract, address]);
 
   /**
-   * Decrypt the balance
+   * Decrypt the balance - Uses PUBLIC decryption
    */
-  const decryptBalance = useCallback(() => {
-    if (!balanceFheDecrypt.canDecrypt) {
-      setMessage("❌ Cannot decrypt: missing handle or FHEVM instance");
+  const decryptBalance = useCallback(async () => {
+    if (!balanceHandle) {
+      setMessage("❌ No balance handle available");
       return;
     }
 
-    setMessage("🔓 Decrypting balance...");
-    balanceFheDecrypt.decrypt();
-  }, [balanceFheDecrypt]);
-
-  // Handle withdrawal decryption results
-  useEffect(() => {
-    if (withdrawalFheDecrypt.results && pendingWithdrawalHandle) {
-      const result = withdrawalFheDecrypt.results[pendingWithdrawalHandle];
-      if (result) {
-        // Decryption completed, now submit the withdrawal
-        const submitWithdrawal = async () => {
-          const contract = getContract("write");
-          if (!contract) {
-            setMessage("❌ Contract not available");
-            return;
-          }
-
-          setIsProcessing(true);
-          setMessage("✅ Amount decrypted!\n🔹 Completing withdrawal with proof verification...");
-
-          try {
-            // The result is already the decrypted value - we need to ABI encode it
-            const cleartexts = ethers.AbiCoder.defaultAbiCoder().encode(["uint64"], [result]);
-
-            // For public decryption, we need to get the proof from the relayer
-            // This is a placeholder - in production you'd use the actual proof
-            const decryptionProof = "0x";
-
-            const completeTx = await contract.completeWithdrawal!(pendingWithdrawalHandle, cleartexts, decryptionProof);
-
-            setMessage(`🔗 Transaction sent: ${completeTx.hash}\nWaiting for confirmation...`);
-
-            const completeReceipt = await completeTx.wait();
-
-            setMessage(
-              `✅ Withdrawal complete!\nETH transferred to your wallet.\nBlock: ${completeReceipt.blockNumber}`,
-            );
-
-            // Reset state
-            setPendingWithdrawalHandle(null);
-            setBalanceHandle(null);
-            setDecryptedBalance(null);
-          } catch (error: any) {
-            console.error("Complete withdrawal error:", error);
-            setMessage(`❌ Failed to complete withdrawal: ${error.message || error}`);
-          } finally {
-            setIsProcessing(false);
-            setIsDecrypting(false);
-          }
-        };
-
-        submitWithdrawal();
-      }
+    if (!instance) {
+      setMessage("❌ Cannot decrypt: FHEVM instance not available");
+      return;
     }
 
-    if (withdrawalFheDecrypt.error) {
-      setMessage(`❌ Decryption failed: ${withdrawalFheDecrypt.error}`);
+    setIsDecrypting(true);
+    setMessage("🔓 Performing public decryption...");
+
+    try {
+      // Use public decryption (the contract called makeBalancePubliclyDecryptable)
+      const decryptionResult = await instance.publicDecrypt([balanceHandle]);
+
+      console.log("🔓 Public decryption result:", decryptionResult);
+
+      // Get the cleartext value for this handle
+      const balanceValue = decryptionResult.clearValues[balanceHandle as `0x${string}`];
+      if (balanceValue === undefined) {
+        console.log("⚠️  Balance is zero or uninitialized");
+        setDecryptedBalance("0");
+        setMessage("✅ Decrypted eWETH balance:\n0 ETH");
+        return;
+      }
+
+      console.log("🔓 Decrypted balance:", balanceValue.toString(), "wei");
+      setDecryptedBalance(balanceValue.toString());
+      setMessage(`✅ Decrypted eWETH balance:\n${ethers.formatEther(balanceValue.toString())} ETH`);
+    } catch (error: any) {
+      console.error("Decrypt balance error:", error);
+      setMessage(`❌ Failed to decrypt balance: ${error.message || error}`);
+    } finally {
       setIsDecrypting(false);
     }
-  }, [withdrawalFheDecrypt.results, withdrawalFheDecrypt.error, pendingWithdrawalHandle]);
+  }, [balanceHandle, instance]);
 
-  // Handle balance decryption results
-  useEffect(() => {
-    if (balanceFheDecrypt.results && balanceHandle) {
-      const balance = balanceFheDecrypt.results[balanceHandle];
-      if (balance) {
-        setDecryptedBalance(balance.toString());
-        setMessage(`✅ Decrypted eWETH balance:\n${ethers.formatEther(balance.toString())} ETH`);
-        setIsDecrypting(false);
-      }
-    }
-
-    if (balanceFheDecrypt.error) {
-      setMessage(`❌ Failed to decrypt balance: ${balanceFheDecrypt.error}`);
-      setIsDecrypting(false);
-    }
-  }, [balanceFheDecrypt.results, balanceFheDecrypt.error, balanceHandle]);
 
   return {
     // State
