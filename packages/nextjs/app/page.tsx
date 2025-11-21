@@ -8,15 +8,15 @@ export default function Home() {
   const [activeDemo, setActiveDemo] = useState<"eweth" | "batcher">("eweth");
 
   return (
-    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "20px" }}>
+    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "4px" }}>
       {/* Demo Selector */}
       <div className="window mb-3">
         <div className="title-bar">
           <div className="title-bar-text">FHE ToolKit</div>
         </div>
         <div className="window-body">
-          <p style={{ marginBottom: "12px", fontSize: "12px" }}>Select your tool:</p>
-          <div style={{ display: "flex", gap: "8px" }}>
+          <p style={{ marginBottom: "6px", fontSize: "12px" }}>Select your tool:</p>
+          <div style={{ display: "flex", gap: "4px" }}>
             <button
               className={`btn ${activeDemo === "eweth" ? "btn-primary" : ""}`}
               onClick={() => setActiveDemo("eweth")}
