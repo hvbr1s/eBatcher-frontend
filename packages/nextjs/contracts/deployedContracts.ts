@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/helper/contract";
 const deployedContracts = {
   11155111: {
     eBatcher7984: {
-      address: "0xD49a2F55cDd08F5e248b68C2e0645B2bE6fb8Da9",
+      address: "0x49239Eaf11c688152996a2A380AB715ac3583A4b",
       abi: [
     {
       "inputs": [
@@ -147,6 +147,11 @@ const deployedContracts = {
         }
       ],
       "name": "UUPSUnsupportedProxiableUUID",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZamaProtocolUnsupported",
       "type": "error"
     },
     {
