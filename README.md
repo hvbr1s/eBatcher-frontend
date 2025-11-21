@@ -12,7 +12,7 @@ You can start using the app immediately - no deployment needed!
 
 ## 🎯 What Does This dApp Do?
 
-This dApp provides two simple but useful utilities for ERC-7984 encrypted tokens:
+This dApp provides three simple but useful utilities for ERC-7984 encrypted tokens:
 
 1. **Read Encrypted Tokens**: Connect your wallet, paste any encrypted ERC-7984 token address, and sign a decryption request with your wallet to view your encrypted balance.
 
@@ -21,6 +21,10 @@ This dApp provides two simple but useful utilities for ERC-7984 encrypted tokens
    - Different amounts to each recipient
 
    This facilitates efficient encrypted payments without revealing amounts on-chain.
+
+3. **eWETH - Encrypted Wrapped ETH**: Wrap your ETH into encrypted WETH (eWETH) for private token balances:
+   - **Wrap ETH**: Deposit ETH to receive encrypted wrapped ETH with a private balance
+   - **Unwrap ETH**: Two-step withdrawal process using FHEVM v0.9 decryption to convert eWETH back to ETH
 
 ---
 

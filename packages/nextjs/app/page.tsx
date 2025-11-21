@@ -14,8 +14,8 @@ export default function Home() {
         <div className="title-bar">
           <div className="title-bar-text">FHE ToolKit</div>
         </div>
-        <div className="window-body">
-          <p style={{ marginBottom: "6px", fontSize: "12px" }}>Select your tool:</p>
+        <div className="window-body" style={{ padding: "8px" }}>
+          <p style={{ marginBottom: "6px", fontSize: "12px", marginTop: "0" }}>Select your tool:</p>
           <div style={{ display: "flex", gap: "4px" }}>
             <button
               className={`btn ${activeDemo === "eweth" ? "btn-primary" : ""}`}

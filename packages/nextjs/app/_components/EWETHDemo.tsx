@@ -13,7 +13,7 @@ import type { AllowedChainIds } from "~~/utils/helper/networks";
  * Allows wrapping ETH to encrypted WETH and unwrapping with FHE operations
  */
 export const EWETHDemo = () => {
-  const { isConnected, chain, address } = useAccount();
+  const { isConnected, chain } = useAccount();
 
   const chainId = chain?.id;
 
@@ -64,7 +64,7 @@ export const EWETHDemo = () => {
   // Form state
   //////////////////////////////////////////////////////////////////////////////
 
-  const [activeTab, setActiveTab] = useState<"deposit" | "withdraw" | "balance">("deposit");
+  const [activeTab, setActiveTab] = useState<"deposit" | "withdraw">("deposit");
   const [depositAmount, setDepositAmount] = useState<string>("0.001");
   const [withdrawAmount, setWithdrawAmount] = useState<string>("0.001");
 
@@ -92,14 +92,6 @@ export const EWETHDemo = () => {
 
   const handleCompleteWithdrawal = () => {
     eWETHHook.completeWithdrawal();
-  };
-
-  const handleGetBalance = async () => {
-    await eWETHHook.getBalance();
-  };
-
-  const handleDecryptBalance = () => {
-    eWETHHook.decryptBalance();
   };
 
   if (!isConnected) {
@@ -145,12 +137,6 @@ export const EWETHDemo = () => {
             onClick={() => setActiveTab("withdraw")}
           >
             Unwrap ETH
-          </button>
-          <button
-            className={`tab-button ${activeTab === "balance" ? "active" : ""}`}
-            onClick={() => setActiveTab("balance")}
-          >
-            Check eWETH Balance
           </button>
         </div>
 
@@ -254,72 +240,6 @@ export const EWETHDemo = () => {
           </fieldset>
         </div>
 
-        {/* Tab Content: Balance */}
-        <div className={`tab-content ${activeTab === "balance" ? "active" : ""}`}>
-          <fieldset>
-            <legend>Check Encrypted Balance</legend>
-
-            <div className="info-box info mb-2">
-              <p style={{ fontSize: "10px" }}>
-                💡 Your eWETH balance is encrypted. First, make it publicly decryptable, then decrypt it to view.
-              </p>
-            </div>
-
-            {/* Step 1: Get Encrypted Balance Button */}
-            {!eWETHHook.balanceHandle && (
-              <div className="field-row">
-                <button
-                  className="btn btn-primary"
-                  disabled={!eWETHHook.canInteract || !address || eWETHHook.isProcessing}
-                  onClick={handleGetBalance}
-                >
-                  {eWETHHook.isProcessing ? "Fetching..." : "Get Balance"}
-                </button>
-              </div>
-            )}
-
-            {/* Step 2: Show Encrypted Handle and Decrypt Button */}
-            {eWETHHook.balanceHandle && !eWETHHook.decryptedBalance && (
-              <div>
-                <div className="sunken-panel mb-2">
-                  <p style={{ fontWeight: "bold", marginBottom: "4px" }}>Encrypted Balance Handle:</p>
-                  <p style={{ fontFamily: "Courier New, monospace", fontSize: "10px", wordBreak: "break-all" }}>
-                    {eWETHHook.balanceHandle}
-                  </p>
-                </div>
-                <div className="field-row">
-                  <button className="btn btn-primary" disabled={eWETHHook.isDecrypting} onClick={handleDecryptBalance}>
-                    {eWETHHook.isDecrypting ? "Decrypting..." : "Decrypt Balance"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Decrypted Balance Display */}
-            {eWETHHook.decryptedBalance && (
-              <div>
-                <div className="sunken-panel mb-2" style={{ padding: "12px", backgroundColor: "#e8f5e9" }}>
-                  <p style={{ fontSize: "12px", fontWeight: "bold", marginBottom: "8px" }}>✅ eWETH Balance:</p>
-                  <p style={{ fontSize: "20px", fontFamily: "Courier New, monospace", color: "#2e7d32" }}>
-                    {(parseFloat(eWETHHook.decryptedBalance) / 1e18).toFixed(6)} ETH
-                  </p>
-                  <p style={{ fontSize: "9px", color: "#666", marginTop: "4px" }}>{eWETHHook.decryptedBalance} wei</p>
-                </div>
-                <div className="field-row">
-                  <button
-                    className="btn"
-                    onClick={() => {
-                      eWETHHook.getBalance();
-                    }}
-                  >
-                    Refresh Balance
-                  </button>
-                </div>
-              </div>
-            )}
-          </fieldset>
-        </div>
-
         {/* Messages Section */}
         {eWETHHook.message && (
           <fieldset className="mt-3">
@@ -365,7 +285,7 @@ export const EWETHDemo = () => {
               <strong>Decrypting:</strong> {eWETHHook.isDecrypting ? "Yes" : "No"}
             </span>
             <span>
-              <strong>eWETH Contract:</strong>{" "}
+              <strong>eWETH Contract:</strong>
               {eWETH?.address ? `${eWETH.address}` : "Not deployed"}
             </span>
           </div>
