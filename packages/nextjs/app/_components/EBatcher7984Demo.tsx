@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFhevm } from "@fhevm-sdk";
 import { useAccount } from "wagmi";
 import { RainbowKitCustomConnectButton } from "~~/components/helper/RainbowKitCustomConnectButton";
@@ -59,9 +59,26 @@ export const EBatcher7984Demo = () => {
   const [tokenAddress, setTokenAddress] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"operator" | "batchSame" | "batchDiff">("operator");
   const [recipientsText, setRecipientsText] = useState<string>("");
-  const [sameAmount, setSameAmount] = useState<string>("100000000");
+  const [sameAmount, setSameAmount] = useState<string>("100"); // Default: 100 tokens (human-readable)
   const [differentAmountsText, setDifferentAmountsText] = useState<string>("");
   const [operatorUntil, setOperatorUntil] = useState<string>("281474976710655");
+  const [currentTokenDecimals, setCurrentTokenDecimals] = useState<number | null>(null);
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Effect: Fetch token decimals when token address changes
+  //////////////////////////////////////////////////////////////////////////////
+
+  useEffect(() => {
+    if (!tokenAddress || !eBatcher.getTokenDecimals) return;
+
+    const fetchDecimals = async () => {
+      const decimals = await eBatcher.getTokenDecimals(tokenAddress);
+      setCurrentTokenDecimals(decimals);
+      console.log(`Token decimals for ${tokenAddress}: ${decimals}`);
+    };
+
+    fetchDecimals();
+  }, [tokenAddress, eBatcher]);
 
   //////////////////////////////////////////////////////////////////////////////
   // Handlers
@@ -73,8 +90,14 @@ export const EBatcher7984Demo = () => {
       .map(r => r.trim())
       .filter(r => r.length > 0);
 
-    const amount = BigInt(sameAmount || "0");
-    await eBatcher.batchSendTokenSameAmount(tokenAddress, recipients, amount);
+    // Convert human-readable amount to smallest units using token decimals
+    const decimals = currentTokenDecimals ?? 18; // Default to 18 if not fetched yet
+    try {
+      const amount = eBatcher.parseTokenUnits(sameAmount || "0", decimals);
+      await eBatcher.batchSendTokenSameAmount(tokenAddress, recipients, amount);
+    } catch (error) {
+      console.error("Failed to parse token amount:", error);
+    }
   };
 
   const handleBatchTransferDiff = async () => {
@@ -86,15 +109,22 @@ export const EBatcher7984Demo = () => {
     const recipients: string[] = [];
     const amounts: bigint[] = [];
 
-    lines.forEach(line => {
-      const [addr, amt] = line.split(",").map(s => s.trim());
-      if (addr && amt) {
-        recipients.push(addr);
-        amounts.push(BigInt(amt));
-      }
-    });
+    // Convert human-readable amounts to smallest units using token decimals
+    const decimals = currentTokenDecimals ?? 18; // Default to 18 if not fetched yet
 
-    await eBatcher.batchSendTokenDifferentAmounts(tokenAddress, recipients, amounts);
+    try {
+      lines.forEach(line => {
+        const [addr, amt] = line.split(",").map(s => s.trim());
+        if (addr && amt) {
+          recipients.push(addr);
+          amounts.push(eBatcher.parseTokenUnits(amt, decimals));
+        }
+      });
+
+      await eBatcher.batchSendTokenDifferentAmounts(tokenAddress, recipients, amounts);
+    } catch (error) {
+      console.error("Failed to parse token amounts:", error);
+    }
   };
 
   const handleSetOperator = async () => {
@@ -146,6 +176,11 @@ export const EBatcher7984Demo = () => {
           </div>
           <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
             Enter the address of an ERC-7984 token (encrypted token standard)
+            {currentTokenDecimals !== null && (
+              <div style={{ marginTop: "4px", fontWeight: "bold", color: "#000" }}>
+                Token decimals: {currentTokenDecimals}
+              </div>
+            )}
           </div>
         </fieldset>
 
@@ -255,7 +290,12 @@ export const EBatcher7984Demo = () => {
                 value={sameAmount}
                 onChange={e => setSameAmount(e.target.value)}
                 style={{ flex: 1 }}
+                placeholder="100"
               />
+            </div>
+            <div style={{ fontSize: "10px", color: "#666", marginBottom: "8px" }}>
+              Enter amount in token units (e.g., &ldquo;100&rdquo; for 100 whole tokens).
+              {currentTokenDecimals !== null && ` Token has ${currentTokenDecimals} decimals.`}
             </div>
 
             <div className="field-row">
@@ -283,11 +323,15 @@ export const EBatcher7984Demo = () => {
             <textarea
               id="recipientsDiff"
               rows={5}
-              placeholder={"0x...,100000000\n0x...,200000000\n0x...,150000000"}
+              placeholder={"0x...,100\n0x...,200\n0x...,150"}
               value={differentAmountsText}
               onChange={e => setDifferentAmountsText(e.target.value)}
               style={{ width: "100%", marginBottom: "8px" }}
             />
+            <div style={{ fontSize: "10px", color: "#666", marginBottom: "8px" }}>
+              Format: address,amount (e.g., &ldquo;0x123...,100&rdquo; for 100 whole tokens).
+              {currentTokenDecimals !== null && ` Token has ${currentTokenDecimals} decimals.`}
+            </div>
 
             <div className="field-row">
               <button
