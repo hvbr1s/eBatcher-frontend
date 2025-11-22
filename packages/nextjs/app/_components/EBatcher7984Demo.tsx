@@ -78,7 +78,7 @@ export const EBatcher7984Demo = () => {
     };
 
     fetchDecimals();
-  }, [tokenAddress, eBatcher.getTokenDecimals]);
+  }, [tokenAddress, eBatcher]);
 
   //////////////////////////////////////////////////////////////////////////////
   // Handlers
@@ -294,7 +294,7 @@ export const EBatcher7984Demo = () => {
               />
             </div>
             <div style={{ fontSize: "10px", color: "#666", marginBottom: "8px" }}>
-              Enter amount in token units (e.g., "100" for 100 tokens).
+              Enter amount in token units (e.g., &ldquo;100&rdquo; for 100 whole tokens).
               {currentTokenDecimals !== null && ` Token has ${currentTokenDecimals} decimals.`}
             </div>
 
@@ -329,7 +329,7 @@ export const EBatcher7984Demo = () => {
               style={{ width: "100%", marginBottom: "8px" }}
             />
             <div style={{ fontSize: "10px", color: "#666", marginBottom: "8px" }}>
-              Format: address,amount (e.g., "0x123...,100" for 100 tokens).
+              Format: address,amount (e.g., &ldquo;0x123...,100&rdquo; for 100 whole tokens).
               {currentTokenDecimals !== null && ` Token has ${currentTokenDecimals} decimals.`}
             </div>
 
