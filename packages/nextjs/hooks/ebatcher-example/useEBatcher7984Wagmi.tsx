@@ -46,6 +46,8 @@ export const useEBatcher7984Wagmi = (parameters: {
   const [balanceTokenAddress, setBalanceTokenAddress] = useState<string>("");
   const [balanceHandle, setBalanceHandle] = useState<string | null>(null);
   const [decryptedBalance, setDecryptedBalance] = useState<string | null>(null);
+  const [tokenDecimals, setTokenDecimals] = useState<number | null>(null);
+  const [tokenSymbol, setTokenSymbol] = useState<string | null>(null);
 
   // Operator approval state
   const [isCheckingOperator, setIsCheckingOperator] = useState<boolean>(false);
@@ -578,6 +580,8 @@ export const useEBatcher7984Wagmi = (parameters: {
       setBalanceTokenAddress(tokenAddress);
       setBalanceHandle(null);
       setDecryptedBalance(null);
+      setTokenDecimals(null);
+      setTokenSymbol(null);
 
       try {
         // Validate token address
@@ -605,19 +609,33 @@ export const useEBatcher7984Wagmi = (parameters: {
 
         const tokenContract = new ethers.Contract(
           tokenAddress,
-          ["function confidentialBalanceOf(address account) external view returns (bytes32)"],
+          [
+            "function confidentialBalanceOf(address account) external view returns (bytes32)",
+            "function decimals() external view returns (uint8)",
+            "function symbol() external view returns (string)",
+          ],
           ethersReadonlyProvider,
         );
 
-        // Get encrypted balance handle
-        const encryptedBalance = await tokenContract.confidentialBalanceOf(userAddress);
+        // Fetch token metadata (decimals and symbol) in parallel with balance
+        const [encryptedBalance, decimals, symbol] = await Promise.all([
+          tokenContract.confidentialBalanceOf(userAddress),
+          tokenContract.decimals().catch(() => 18), // Default to 18 if not available
+          tokenContract.symbol().catch(() => "TOKEN"), // Default to "TOKEN" if not available
+        ]);
+
         const handleHex = typeof encryptedBalance === "string" ? encryptedBalance : encryptedBalance.toString();
 
+        // Store token metadata
+        setTokenDecimals(Number(decimals));
+        setTokenSymbol(symbol);
+
         console.log("✅ Got encrypted balance handle:", handleHex);
+        console.log("📝 Token metadata:", { decimals: Number(decimals), symbol });
 
         // Check if balance is zero (0x0000...0000)
         if (handleHex === "0x0000000000000000000000000000000000000000000000000000000000000000") {
-          setMessage("Balance is zero (or uninitialized). No need to decrypt.");
+          setMessage(`Balance is zero (or uninitialized). No need to decrypt.`);
           setBalanceHandle(handleHex);
           setDecryptedBalance("0");
           return;
@@ -672,9 +690,35 @@ export const useEBatcher7984Wagmi = (parameters: {
     if (fheDecrypt.results && balanceHandle && fheDecrypt.results[balanceHandle]) {
       const balance = fheDecrypt.results[balanceHandle];
       setDecryptedBalance(balance.toString());
-      setMessage(`✅ Decrypted Balance: ${balance.toString()}`);
+
+      // Format the balance with decimals if available
+      let formattedBalance = balance.toString();
+      if (tokenDecimals !== null && tokenDecimals > 0) {
+        const balanceBigInt = BigInt(balance);
+        const divisor = BigInt(10 ** tokenDecimals);
+        const integerPart = balanceBigInt / divisor;
+        const fractionalPart = balanceBigInt % divisor;
+
+        // Format with proper decimal places
+        const fractionalString = fractionalPart.toString().padStart(tokenDecimals, '0');
+        // Remove trailing zeros
+        const trimmedFractional = fractionalString.replace(/0+$/, '');
+
+        if (trimmedFractional.length > 0) {
+          formattedBalance = `${integerPart}.${trimmedFractional}`;
+        } else {
+          formattedBalance = integerPart.toString();
+        }
+      }
+
+      const symbol = tokenSymbol || '';
+      const displayMessage = symbol
+        ? `✅ Decrypted Balance: ${formattedBalance} ${symbol}`
+        : `✅ Decrypted Balance: ${formattedBalance}`;
+
+      setMessage(displayMessage);
     }
-  }, [fheDecrypt.results, balanceHandle]);
+  }, [fheDecrypt.results, balanceHandle, tokenDecimals, tokenSymbol]);
 
   /**
    * Rescue tokens sent to the contract (owner only)
@@ -744,6 +788,8 @@ export const useEBatcher7984Wagmi = (parameters: {
     decryptBalance,
     decryptedBalance,
     balanceHandle,
+    tokenDecimals,
+    tokenSymbol,
     isDecryptingBalance: fheDecrypt.isDecrypting,
     decryptionError: fheDecrypt.error,
     // Operator management
