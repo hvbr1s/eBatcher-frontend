@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { EBatcher7984Demo } from "./_components/EBatcher7984Demo";
 import { EWETHDemo } from "./_components/EWETHDemo";
+import { TokenBalanceChecker } from "./_components/TokenBalanceChecker";
 
 export default function Home() {
-  const [activeDemo, setActiveDemo] = useState<"eweth" | "batcher">("eweth");
+  const [activeDemo, setActiveDemo] = useState<"eweth" | "batcher" | "balance">("eweth");
 
   return (
     <div style={{ maxWidth: "900px", margin: "0 auto", padding: "4px" }}>
@@ -31,12 +32,25 @@ export default function Home() {
             >
               eBatcher (Batch Transfers)
             </button>
+            <button
+              className={`btn ${activeDemo === "balance" ? "btn-primary" : ""}`}
+              onClick={() => setActiveDemo("balance")}
+              style={{ flex: 1 }}
+            >
+              eToken (Balance Checker)
+            </button>
           </div>
         </div>
       </div>
 
       {/* Active Demo */}
-      {activeDemo === "eweth" ? <EWETHDemo /> : <EBatcher7984Demo />}
+      {activeDemo === "eweth" ? (
+        <EWETHDemo />
+      ) : activeDemo === "batcher" ? (
+        <EBatcher7984Demo />
+      ) : (
+        <TokenBalanceChecker />
+      )}
     </div>
   );
 }
