@@ -116,14 +116,12 @@ export const EWETHDemo = () => {
     <div className="window">
       <div className="title-bar">
         <div className="title-bar-text">eWETH - Encrypted Wrapped ETH</div>
+        <div className="title-bar-controls">
+          <RainbowKitCustomConnectButton />
+        </div>
       </div>
 
       <div className="window-body">
-        {/* Wallet Connection */}
-        <div className="field-row mb-3">
-          <RainbowKitCustomConnectButton />
-        </div>
-
         {/* Tabs */}
         <div className="tabs">
           <button

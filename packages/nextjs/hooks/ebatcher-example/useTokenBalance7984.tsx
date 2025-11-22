@@ -132,7 +132,8 @@ export const useTokenBalance7984 = (parameters: {
 
         // Check if balance is zero (0x0000...0000)
         if (handleHex === "0x0000000000000000000000000000000000000000000000000000000000000000") {
-          setMessage(`Balance is zero (or uninitialized). No need to decrypt.`);
+          const symbolDisplay = symbol ? ` ${symbol}` : "";
+          setMessage(`✅ Balance: 0${symbolDisplay}\n\nThis balance is zero or uninitialized.`);
           setBalanceHandle(handleHex);
           setDecryptedBalance("0");
           return;
@@ -173,6 +174,13 @@ export const useTokenBalance7984 = (parameters: {
    * Decrypt the balance after getting the handle
    */
   const decryptBalance = useCallback(() => {
+    // Check if balance is already known to be zero
+    if (balanceHandle === "0x0000000000000000000000000000000000000000000000000000000000000000") {
+      setMessage("Balance is zero (0). No decryption needed.");
+      setDecryptedBalance("0");
+      return;
+    }
+
     if (!fheDecrypt.canDecrypt) {
       setMessage("Cannot decrypt: missing handle or FHEVM instance");
       return;
@@ -180,7 +188,7 @@ export const useTokenBalance7984 = (parameters: {
 
     setMessage("Starting decryption...");
     fheDecrypt.decrypt();
-  }, [fheDecrypt]);
+  }, [fheDecrypt, balanceHandle]);
 
   // Update decrypted balance when decryption completes
   useMemo(() => {

@@ -57,7 +57,7 @@ export const EBatcher7984Demo = () => {
   //////////////////////////////////////////////////////////////////////////////
 
   const [tokenAddress, setTokenAddress] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"balance" | "operator" | "batchSame" | "batchDiff">("balance");
+  const [activeTab, setActiveTab] = useState<"operator" | "batchSame" | "batchDiff">("operator");
   const [recipientsText, setRecipientsText] = useState<string>("");
   const [sameAmount, setSameAmount] = useState<string>("100000000");
   const [differentAmountsText, setDifferentAmountsText] = useState<string>("");
@@ -97,15 +97,6 @@ export const EBatcher7984Demo = () => {
     await eBatcher.batchSendTokenDifferentAmounts(tokenAddress, recipients, amounts);
   };
 
-  const handleGetBalance = async () => {
-    if (!tokenAddress || !address) return;
-    await eBatcher.getTokenBalance(tokenAddress, address);
-  };
-
-  const handleDecryptBalance = () => {
-    eBatcher.decryptBalance();
-  };
-
   const handleSetOperator = async () => {
     if (!tokenAddress) return;
     await eBatcher.setOperator(tokenAddress, operatorUntil);
@@ -133,14 +124,12 @@ export const EBatcher7984Demo = () => {
     <div className="window">
       <div className="title-bar">
         <div className="title-bar-text">eBatcher - Encrypted Batch Transfer</div>
+        <div className="title-bar-controls">
+          <RainbowKitCustomConnectButton />
+        </div>
       </div>
 
       <div className="window-body">
-        {/* Wallet Connection */}
-        <div className="field-row mb-3">
-          <RainbowKitCustomConnectButton />
-        </div>
-
         {/* Configuration Section */}
         <fieldset className="mb-3">
           <legend>Configuration</legend>
@@ -163,12 +152,6 @@ export const EBatcher7984Demo = () => {
         {/* Tabs */}
         <div className="tabs">
           <button
-            className={`tab-button ${activeTab === "balance" ? "active" : ""}`}
-            onClick={() => setActiveTab("balance")}
-          >
-            Check Balance
-          </button>
-          <button
             className={`tab-button ${activeTab === "operator" ? "active" : ""}`}
             onClick={() => setActiveTab("operator")}
           >
@@ -186,73 +169,6 @@ export const EBatcher7984Demo = () => {
           >
             Batch (Different Amounts)
           </button>
-        </div>
-
-        {/* Tab Content: Check Balance */}
-        <div className={`tab-content ${activeTab === "balance" ? "active" : ""}`}>
-          <fieldset>
-            <legend>Check Encrypted Balance</legend>
-
-            {/* Step 1: Get Encrypted Balance Button */}
-            {!eBatcher.balanceHandle && (
-              <div className="field-row">
-                <button
-                  className="btn btn-primary"
-                  disabled={!eBatcher.canInteract || !tokenAddress || eBatcher.isProcessing}
-                  onClick={handleGetBalance}
-                >
-                  {eBatcher.isProcessing ? "Fetching..." : "Check Balance"}
-                </button>
-              </div>
-            )}
-
-            {/* Step 2: Show Encrypted Handle and Decrypt Button */}
-            {eBatcher.balanceHandle && !eBatcher.decryptedBalance && (
-              <div>
-                <div className="sunken-panel mb-2">
-                  <p style={{ fontWeight: "bold", marginBottom: "4px" }}>Encrypted Balance Handle:</p>
-                  <p style={{ fontFamily: "Courier New, monospace", fontSize: "10px", wordBreak: "break-all" }}>
-                    {eBatcher.balanceHandle}
-                  </p>
-                </div>
-                <div className="field-row">
-                  <button
-                    className="btn btn-primary"
-                    disabled={eBatcher.isDecryptingBalance}
-                    onClick={handleDecryptBalance}
-                  >
-                    {eBatcher.isDecryptingBalance ? "Decrypting..." : "Decrypt Balance"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Decrypted Balance Display */}
-            {eBatcher.decryptedBalance && (
-              <div>
-                <div className="sunken-panel mb-2" style={{ padding: "6px" }}>
-                  <p style={{ fontSize: "10px", margin: 0 }}>
-                    <strong>Balance:</strong>{" "}
-                    <span style={{ fontFamily: "Courier New, monospace" }}>{eBatcher.decryptedBalance}</span>
-                  </p>
-                </div>
-                <div className="field-row">
-                  <button className="btn" onClick={() => setTokenAddress("")}>
-                    Check Another Token
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Decryption Error */}
-            {eBatcher.decryptionError && (
-              <div className="info-box error">
-                <p style={{ fontFamily: "Courier New, monospace", fontSize: "11px" }}>{eBatcher.decryptionError}</p>
-              </div>
-            )}
-
-            <div id="balanceResult" className="result-box"></div>
-          </fieldset>
         </div>
 
         {/* Tab Content: Set Operator */}

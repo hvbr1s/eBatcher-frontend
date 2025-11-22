@@ -1,14 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useFhevm } from "@fhevm-sdk";
+import { useAccount } from "wagmi";
+import { RainbowKitCustomConnectButton } from "~~/components/helper/RainbowKitCustomConnectButton";
 import { useTokenBalance7984 } from "~~/hooks/ebatcher-example/useTokenBalance7984";
-import { FhevmInstance } from "@fhevm-sdk";
-
-interface TokenBalanceCheckerProps {
-  instance: FhevmInstance | undefined;
-  userAddress: string | undefined;
-  initialMockChains?: Readonly<Record<number, string>>;
-}
 
 /**
  * TokenBalanceChecker - Component for checking ERC-7984 token balances
@@ -18,8 +14,33 @@ interface TokenBalanceCheckerProps {
  * - Fetch encrypted balance
  * - Decrypt and display balance with proper formatting
  */
-export const TokenBalanceChecker = ({ instance, userAddress, initialMockChains }: TokenBalanceCheckerProps) => {
+export const TokenBalanceChecker = () => {
   const [tokenAddress, setTokenAddress] = useState<string>("");
+
+  const { address, chain } = useAccount();
+  const chainId = chain?.id;
+
+  // Create EIP-1193 provider from wagmi for FHEVM
+  const provider = useMemo(() => {
+    if (typeof window === "undefined") return undefined;
+
+    // If on Sepolia, use RPC URL string for proper network connection
+    if (chainId === 11155111) {
+      return "https://ethereum-sepolia-rpc.publicnode.com";
+    }
+
+    // For other networks (like local hardhat), use wallet provider
+    return (window as any).ethereum;
+  }, [chainId]);
+
+  const initialMockChains = { 31337: "http://localhost:8545" };
+
+  const { instance: fhevmInstance } = useFhevm({
+    provider,
+    chainId,
+    initialMockChains,
+    enabled: true,
+  });
 
   const {
     canInteract,
@@ -27,16 +48,13 @@ export const TokenBalanceChecker = ({ instance, userAddress, initialMockChains }
     isProcessing,
     getTokenBalance,
     decryptBalance,
-    decryptedBalance,
     balanceHandle,
-    tokenDecimals,
-    tokenSymbol,
     isDecryptingBalance,
     decryptionError,
-  } = useTokenBalance7984({ instance, initialMockChains });
+  } = useTokenBalance7984({ instance: fhevmInstance, initialMockChains });
 
   const handleGetBalance = async () => {
-    if (!userAddress) {
+    if (!address) {
       alert("Please connect your wallet first");
       return;
     }
@@ -44,7 +62,7 @@ export const TokenBalanceChecker = ({ instance, userAddress, initialMockChains }
       alert("Please enter a token address");
       return;
     }
-    await getTokenBalance(tokenAddress, userAddress);
+    await getTokenBalance(tokenAddress, address);
   };
 
   const handleDecryptBalance = () => {
@@ -52,10 +70,15 @@ export const TokenBalanceChecker = ({ instance, userAddress, initialMockChains }
   };
 
   return (
-    <div className="card w-full bg-base-100 shadow-xl">
-      <div className="card-body">
-        <h2 className="card-title">ERC-7984 Token Balance Checker</h2>
+    <div className="window">
+      <div className="title-bar">
+        <div className="title-bar-text">ERC-7984 Token Balance Checker</div>
+        <div className="title-bar-controls">
+          <RainbowKitCustomConnectButton />
+        </div>
+      </div>
 
+      <div className="window-body" style={{ padding: "12px" }}>
         <div className="form-control w-full">
           <label className="label">
             <span className="label-text">Token Address</span>
@@ -78,7 +101,7 @@ export const TokenBalanceChecker = ({ instance, userAddress, initialMockChains }
             type="text"
             placeholder="Connect wallet"
             className="input input-bordered w-full"
-            value={userAddress || ""}
+            value={address || ""}
             disabled
           />
         </div>
@@ -87,7 +110,7 @@ export const TokenBalanceChecker = ({ instance, userAddress, initialMockChains }
           <button
             className="btn btn-primary"
             onClick={handleGetBalance}
-            disabled={!canInteract || !userAddress || !tokenAddress}
+            disabled={!canInteract || !address || !tokenAddress}
           >
             {isProcessing && !isDecryptingBalance ? (
               <>
@@ -129,20 +152,6 @@ export const TokenBalanceChecker = ({ instance, userAddress, initialMockChains }
           <div className="alert alert-error mt-4">
             <div className="flex-1">
               <span>Decryption Error: {decryptionError}</span>
-            </div>
-          </div>
-        )}
-
-        {decryptedBalance && (
-          <div className="stats shadow mt-4">
-            <div className="stat">
-              <div className="stat-title">Balance</div>
-              <div className="stat-value text-primary">
-                {tokenDecimals !== null && tokenDecimals > 0
-                  ? (Number(decryptedBalance) / 10 ** tokenDecimals).toFixed(Math.min(tokenDecimals, 6))
-                  : decryptedBalance}
-              </div>
-              {tokenSymbol && <div className="stat-desc">{tokenSymbol}</div>}
             </div>
           </div>
         )}
