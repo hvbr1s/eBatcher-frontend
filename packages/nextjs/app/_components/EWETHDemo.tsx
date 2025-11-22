@@ -181,7 +181,7 @@ export const EWETHDemo = () => {
             <legend>Withdraw eWETH to ETH (Two-Step Process)</legend>
 
             <div className="info-box warning mb-2">
-              <p style={{ fontWeight: "bold", marginBottom: "4px" }}>⚠️ FHEVM v0.9 Two-Step Withdrawal</p>
+              <p style={{ fontWeight: "bold", marginBottom: "4px" }}>⚠️ Two-Step Withdrawal</p>
               <p style={{ fontSize: "10px" }}>
                 1. <strong>Initiate Withdrawal</strong>: Encrypt and submit the withdrawal amount
                 <br />
@@ -286,7 +286,7 @@ export const EWETHDemo = () => {
             </span>
             <span>
               <strong>eWETH Contract:</strong>
-              {eWETH?.address ? `${eWETH.address}` : "Not deployed"}
+              {eWETH?.address ? ` ${eWETH.address}` : "Not deployed"}
             </span>
           </div>
         </fieldset>
