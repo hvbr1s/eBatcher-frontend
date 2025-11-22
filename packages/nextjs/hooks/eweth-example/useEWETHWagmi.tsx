@@ -99,10 +99,14 @@ export const useEWETHWagmi = (parameters: {
       setMessage("💰 Depositing ETH...");
 
       try {
-        // Check if amount exceeds uint64.max
+        // Convert from wei (18 decimals) to token units (6 decimals) for validation
+        const DECIMALS_CONVERSION = BigInt(10 ** 12);
+        const tokenAmount = amountWei / DECIMALS_CONVERSION;
+
+        // Check if token amount exceeds uint64.max
         const uint64Max = BigInt("18446744073709551615");
-        if (amountWei > uint64Max) {
-          throw new Error(`Amount exceeds uint64 max (${ethers.formatEther(uint64Max.toString())} ETH)`);
+        if (tokenAmount > uint64Max) {
+          throw new Error(`Amount exceeds uint64 max (${ethers.formatEther((uint64Max * DECIMALS_CONVERSION).toString())} ETH)`);
         }
 
         const tx = await contract.deposit!({ value: amountWei });
@@ -144,16 +148,20 @@ export const useEWETHWagmi = (parameters: {
       setMessage("💸 Initiating withdrawal...");
 
       try {
+        // Convert from wei (18 decimals) to token units (6 decimals)
+        const DECIMALS_CONVERSION = BigInt(10 ** 12);
+        const tokenAmount = amountWei / DECIMALS_CONVERSION;
+
         // Check if amount exceeds uint64.max
         const uint64Max = BigInt("18446744073709551615");
-        if (amountWei > uint64Max) {
-          throw new Error(`Amount exceeds uint64 max (${ethers.formatEther(uint64Max.toString())} ETH)`);
+        if (tokenAmount > uint64Max) {
+          throw new Error(`Amount exceeds uint64 max (${ethers.formatEther((uint64Max * DECIMALS_CONVERSION).toString())} ETH)`);
         }
 
-        // Encrypt the withdrawal amount
+        // Encrypt the withdrawal amount (in token units, not wei)
         setMessage("🔐 Encrypting withdrawal amount...");
         const encryptedAmount = await encryptWith(builder => {
-          builder.add64(amountWei);
+          builder.add64(tokenAmount);
         });
 
         if (!encryptedAmount) {
