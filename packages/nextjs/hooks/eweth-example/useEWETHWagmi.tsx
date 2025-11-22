@@ -241,9 +241,15 @@ export const useEWETHWagmi = (parameters: {
         throw new Error(`No cleartext value found for handle ${pendingWithdrawalHandle}`);
       }
 
-      console.log("🔓 Decrypted amount:", cleartextValue.toString(), "wei");
+      // Convert from token units (6 decimals) to wei (18 decimals) for display
+      const DECIMALS_CONVERSION = BigInt(10 ** 12);
+      const tokenAmountBigInt = typeof cleartextValue === 'bigint' ? cleartextValue : BigInt(cleartextValue.toString());
+      const weiAmount = tokenAmountBigInt * DECIMALS_CONVERSION;
+
+      console.log("🔓 Decrypted amount:", tokenAmountBigInt.toString(), "token units");
+      console.log("🔓 Wei amount:", weiAmount.toString(), "wei");
       setMessage(
-        `✅ Amount decrypted: ${ethers.formatEther(cleartextValue.toString())} ETH\n🔹 Completing withdrawal with proof verification...`,
+        `✅ Amount decrypted: ${ethers.formatEther(weiAmount.toString())} ETH\n🔹 Completing withdrawal with proof verification...`,
       );
 
       // Complete the withdrawal with the decrypted value and proof
