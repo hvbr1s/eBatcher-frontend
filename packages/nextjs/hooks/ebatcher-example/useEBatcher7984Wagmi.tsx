@@ -279,6 +279,54 @@ export const useEBatcher7984Wagmi = (parameters: {
   );
 
   /**
+   * Fetch token decimals for conversion
+   */
+  const getTokenDecimals = useCallback(
+    async (tokenAddress: string): Promise<number> => {
+      if (!ethersReadonlyProvider) return 18; // Default to 18 if provider not available
+
+      try {
+        const tokenContract = new ethers.Contract(
+          tokenAddress,
+          ["function decimals() external view returns (uint8)"],
+          ethersReadonlyProvider,
+        );
+
+        const decimals = await tokenContract.decimals();
+        return Number(decimals);
+      } catch (e) {
+        console.warn("Failed to fetch token decimals, defaulting to 18:", e);
+        return 18; // Default to 18 decimals if fetch fails
+      }
+    },
+    [ethersReadonlyProvider],
+  );
+
+  /**
+   * Convert ETH/token display value to smallest units (wei equivalent)
+   * @param value The human-readable value (e.g., "1.5" for 1.5 tokens)
+   * @param decimals The number of decimals for the token
+   * @returns The value in smallest units as bigint
+   */
+  const parseTokenUnits = (value: string, decimals: number): bigint => {
+    try {
+      return ethers.parseUnits(value, decimals);
+    } catch (e) {
+      throw new Error(`Invalid token amount: ${value}`);
+    }
+  };
+
+  /**
+   * Convert smallest units to ETH/token display value
+   * @param value The value in smallest units
+   * @param decimals The number of decimals for the token
+   * @returns The human-readable value as string
+   */
+  const formatTokenUnits = (value: bigint, decimals: number): string => {
+    return ethers.formatUnits(value, decimals);
+  };
+
+  /**
    * Batch send the same token amount to multiple recipients
    */
   const batchSendTokenSameAmount = useCallback(
@@ -797,6 +845,10 @@ export const useEBatcher7984Wagmi = (parameters: {
     setOperator,
     isCheckingOperator,
     operatorStatus,
+    // Token utilities
+    getTokenDecimals,
+    parseTokenUnits,
+    formatTokenUnits,
     // Wagmi-specific values
     chainId,
     accounts,
