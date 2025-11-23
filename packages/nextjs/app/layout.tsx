@@ -5,8 +5,8 @@ import "~~/styles/globals.css";
 import { getMetadata } from "~~/utils/helper/getMetadata";
 
 export const metadata = getMetadata({
-  title: "Confidential Batcher",
-  description: "Batch transfer confidential ERC-7984 tokens with FHE encryption",
+  title: "FHE ToolKit",
+  description: "Tools to wrap, read and batch transfer confidential ERC-7984 ecrypted tokens",
 });
 
 const DappWrapper = ({ children }: { children: React.ReactNode }) => {
