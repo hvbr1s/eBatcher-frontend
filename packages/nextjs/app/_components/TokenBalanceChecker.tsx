@@ -140,20 +140,49 @@ export const TokenBalanceChecker = () => {
           )}
         </div>
 
+        {/* Messages Section */}
         {message && (
-          <div className="alert mt-4">
-            <div className="flex-1">
-              <pre className="whitespace-pre-wrap text-sm">{message}</pre>
+          <fieldset className="mt-3">
+            <legend>Messages</legend>
+            <div className="sunken-panel">
+              <div style={{ fontFamily: "Courier New, monospace", fontSize: "11px", whiteSpace: "pre-wrap" }}>
+                {message.split("\n").map((line, i) => {
+                  // Check if line contains a URL
+                  const urlMatch = line.match(/(https?:\/\/[^\s]+)/);
+                  if (urlMatch) {
+                    const url = urlMatch[1];
+                    const parts = line.split(url);
+                    return (
+                      <div key={i}>
+                        {parts[0]}
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "#0000EE", textDecoration: "underline" }}
+                        >
+                          {url}
+                        </a>
+                        {parts[1]}
+                      </div>
+                    );
+                  }
+                  return <div key={i}>{line}</div>;
+                })}
+              </div>
             </div>
-          </div>
+          </fieldset>
         )}
 
         {decryptionError && (
-          <div className="alert alert-error mt-4">
-            <div className="flex-1">
-              <span>Decryption Error: {decryptionError}</span>
+          <fieldset className="mt-3">
+            <legend>Error</legend>
+            <div className="sunken-panel" style={{ backgroundColor: "#fee", border: "1px solid #c33" }}>
+              <div style={{ fontFamily: "Courier New, monospace", fontSize: "11px", color: "#c33" }}>
+                Decryption Error: {decryptionError}
+              </div>
             </div>
-          </div>
+          </fieldset>
         )}
 
         <div className="divider"></div>
