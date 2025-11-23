@@ -12,7 +12,7 @@ const deployedContracts = {
       deployedOnBlock: 9684788,
     },
     eBatcher7984: {
-      address: "0x49239Eaf11c688152996a2A380AB715ac3583A4b",
+      address: "0x4228F4179a3354071f03d951eA84194283dED27C",
       abi: [
     {
       "inputs": [

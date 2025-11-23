@@ -122,7 +122,7 @@ export const TokenBalanceChecker = () => {
             )}
           </button>
 
-          {balanceHandle && balanceHandle !== "0x0000000000000000000000000000000000000000000000000000000000000000" && (
+          {balanceHandle && (
             <button
               className="btn btn-secondary"
               onClick={handleDecryptBalance}

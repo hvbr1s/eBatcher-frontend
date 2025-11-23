@@ -130,15 +130,6 @@ export const useTokenBalance7984 = (parameters: {
         console.log("✅ Got encrypted balance handle:", handleHex);
         console.log("📝 Token metadata:", { decimals: Number(decimals), symbol });
 
-        // Check if balance is zero (0x0000...0000)
-        if (handleHex === "0x0000000000000000000000000000000000000000000000000000000000000000") {
-          const symbolDisplay = symbol ? ` ${symbol}` : "";
-          setMessage(`✅ Balance: 0${symbolDisplay}\n\nThis balance is zero or uninitialized.`);
-          setBalanceHandle(handleHex);
-          setDecryptedBalance("0");
-          return;
-        }
-
         setMessage("Got encrypted balance handle. Click 'Decrypt Balance' to reveal the amount.");
         setBalanceHandle(handleHex);
       } catch (e: any) {
@@ -174,13 +165,6 @@ export const useTokenBalance7984 = (parameters: {
    * Decrypt the balance after getting the handle
    */
   const decryptBalance = useCallback(() => {
-    // Check if balance is already known to be zero
-    if (balanceHandle === "0x0000000000000000000000000000000000000000000000000000000000000000") {
-      setMessage("Balance is zero (0). No decryption needed.");
-      setDecryptedBalance("0");
-      return;
-    }
-
     if (!fheDecrypt.canDecrypt) {
       setMessage("Cannot decrypt: missing handle or FHEVM instance");
       return;
@@ -188,7 +172,7 @@ export const useTokenBalance7984 = (parameters: {
 
     setMessage("Starting decryption...");
     fheDecrypt.decrypt();
-  }, [fheDecrypt, balanceHandle]);
+  }, [fheDecrypt]);
 
   // Update decrypted balance when decryption completes
   useMemo(() => {
@@ -224,6 +208,20 @@ export const useTokenBalance7984 = (parameters: {
       setMessage(displayMessage);
     }
   }, [fheDecrypt.results, balanceHandle, tokenDecimals, tokenSymbol]);
+
+  // Handle decryption errors
+  useMemo(() => {
+    if (fheDecrypt.error) {
+      setMessage(`❌ Decryption failed: ${fheDecrypt.error}`);
+    }
+  }, [fheDecrypt.error]);
+
+  // Update message when decryption state changes
+  useMemo(() => {
+    if (fheDecrypt.isDecrypting) {
+      setMessage("Decrypting balance...");
+    }
+  }, [fheDecrypt.isDecrypting]);
 
   return {
     canInteract,
