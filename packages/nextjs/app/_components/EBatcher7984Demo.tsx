@@ -68,63 +68,89 @@ export const EBatcher7984Demo = () => {
   // Effect: Fetch token decimals when token address changes
   //////////////////////////////////////////////////////////////////////////////
 
+  const { getTokenDecimals } = eBatcher;
+
   useEffect(() => {
-    if (!tokenAddress || !eBatcher.getTokenDecimals) return;
+    if (!tokenAddress || !getTokenDecimals) return;
+
+    // Validate address format before fetching
+    const isValidAddress = /^0x[a-fA-F0-9]{40}$/.test(tokenAddress);
+    if (!isValidAddress) {
+      setCurrentTokenDecimals(null);
+      return;
+    }
 
     const fetchDecimals = async () => {
-      const decimals = await eBatcher.getTokenDecimals(tokenAddress);
+      const decimals = await getTokenDecimals(tokenAddress);
       setCurrentTokenDecimals(decimals);
       console.log(`Token decimals for ${tokenAddress}: ${decimals}`);
     };
 
     fetchDecimals();
-  }, [tokenAddress, eBatcher]);
+  }, [tokenAddress, getTokenDecimals]);
 
   //////////////////////////////////////////////////////////////////////////////
   // Handlers
   //////////////////////////////////////////////////////////////////////////////
 
   const handleBatchTransferSame = async () => {
+    if (!tokenAddress) return;
+
     const recipients = recipientsText
       .split("\n")
       .map(r => r.trim())
       .filter(r => r.length > 0);
 
+    if (recipients.length === 0) return;
+
+    // Ensure decimals are fetched
+    const decimals = currentTokenDecimals ?? 18;
+
     // Convert human-readable amount to smallest units using token decimals
-    const decimals = currentTokenDecimals ?? 18; // Default to 18 if not fetched yet
+    let amount: bigint;
     try {
-      const amount = eBatcher.parseTokenUnits(sameAmount || "0", decimals);
-      await eBatcher.batchSendTokenSameAmount(tokenAddress, recipients, amount);
-    } catch (error) {
+      amount = eBatcher.parseTokenUnits(sameAmount || "0", decimals);
+    } catch (error: any) {
       console.error("Failed to parse token amount:", error);
+      return;
     }
+
+    await eBatcher.batchSendTokenSameAmount(tokenAddress, recipients, amount);
   };
 
   const handleBatchTransferDiff = async () => {
+    if (!tokenAddress) return;
+
     const lines = differentAmountsText
       .split("\n")
       .map(l => l.trim())
       .filter(l => l.length > 0);
 
+    if (lines.length === 0) return;
+
     const recipients: string[] = [];
     const amounts: bigint[] = [];
 
-    // Convert human-readable amounts to smallest units using token decimals
-    const decimals = currentTokenDecimals ?? 18; // Default to 18 if not fetched yet
+    // Ensure decimals are fetched
+    const decimals = currentTokenDecimals ?? 18;
 
+    // Convert human-readable amounts to smallest units using token decimals
     try {
-      lines.forEach(line => {
+      for (const line of lines) {
         const [addr, amt] = line.split(",").map(s => s.trim());
         if (addr && amt) {
           recipients.push(addr);
           amounts.push(eBatcher.parseTokenUnits(amt, decimals));
         }
-      });
-
-      await eBatcher.batchSendTokenDifferentAmounts(tokenAddress, recipients, amounts);
-    } catch (error) {
+      }
+    } catch (error: any) {
       console.error("Failed to parse token amounts:", error);
+      return;
     }
+
+    if (recipients.length === 0) return;
+
+    await eBatcher.batchSendTokenDifferentAmounts(tokenAddress, recipients, amounts);
   };
 
   const handleSetOperator = async () => {

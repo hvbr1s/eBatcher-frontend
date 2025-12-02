@@ -2,17 +2,17 @@
 /* Based on minimalist design with high contrast */
 
 :root {
-  --win98-bg: #ffffff;
+  --win98-bg: #c8c8e8;
   --win98-light: #ffffff;
   --win98-dark: #000000;
   --win98-darker: #000000;
   --win98-white: #ffffff;
   --win98-black: #000000;
-  --win98-blue: #000000;
-  --win98-title-bar: #000000;
+  --win98-blue: #4a6a8a;
+  --win98-title-bar: #4a6a8a;
   --win98-title-text: #ffffff;
   --win98-button-face: silver;
-  --win98-selected: #000000;
+  --win98-selected: #4a6a8a;
   --win98-selected-text: #ffffff;
 }
 
@@ -28,8 +28,8 @@
 
 /* Title Bar */
 .title-bar {
-  background: black;
-  color: white;
+  background: var(--win98-title-bar);
+  color: var(--win98-title-text);
   padding: 3px 5px;
   display: flex;
   justify-content: space-between;
