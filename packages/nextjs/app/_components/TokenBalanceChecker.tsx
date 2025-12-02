@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFhevm } from "@fhevm-sdk";
 import { useAccount } from "wagmi";
 import { RainbowKitCustomConnectButton } from "~~/components/helper/RainbowKitCustomConnectButton";
@@ -53,6 +53,13 @@ export const TokenBalanceChecker = () => {
     decryptionError,
   } = useTokenBalance7984({ instance: fhevmInstance, initialMockChains });
 
+  // Auto-trigger decryption when balance handle is fetched
+  useEffect(() => {
+    if (balanceHandle && canInteract && !isDecryptingBalance) {
+      decryptBalance();
+    }
+  }, [balanceHandle, canInteract, isDecryptingBalance, decryptBalance]);
+
   const handleGetBalance = async () => {
     if (!address) {
       alert("Please connect your wallet first");
@@ -63,10 +70,6 @@ export const TokenBalanceChecker = () => {
       return;
     }
     await getTokenBalance(tokenAddress, address);
-  };
-
-  const handleDecryptBalance = () => {
-    decryptBalance();
   };
 
   return (
@@ -110,34 +113,22 @@ export const TokenBalanceChecker = () => {
           <button
             className="btn btn-primary"
             onClick={handleGetBalance}
-            disabled={!canInteract || !address || !tokenAddress}
+            disabled={!canInteract || !address || !tokenAddress || isProcessing || isDecryptingBalance}
           >
-            {isProcessing && !isDecryptingBalance ? (
+            {isProcessing ? (
               <>
                 <span className="loading loading-spinner loading-sm"></span>
                 Fetching...
+              </>
+            ) : isDecryptingBalance ? (
+              <>
+                <span className="loading loading-spinner loading-sm"></span>
+                Decrypting...
               </>
             ) : (
               "Get Balance"
             )}
           </button>
-
-          {balanceHandle && (
-            <button
-              className="btn btn-secondary"
-              onClick={handleDecryptBalance}
-              disabled={!canInteract || isDecryptingBalance}
-            >
-              {isDecryptingBalance ? (
-                <>
-                  <span className="loading loading-spinner loading-sm"></span>
-                  Decrypting...
-                </>
-              ) : (
-                "Decrypt Balance"
-              )}
-            </button>
-          )}
         </div>
 
         {/* Messages Section */}
@@ -193,9 +184,17 @@ export const TokenBalanceChecker = () => {
           </p>
           <ol className="list-decimal list-inside space-y-1 mt-2">
             <li>Enter the ERC-7984 token contract address</li>
-            <li>Click &quot;Get Balance&quot; to fetch your encrypted balance</li>
-            <li>Click &quot;Decrypt Balance&quot; to reveal the actual amount</li>
+            <li>Click &quot;Get Balance&quot; to fetch and decrypt your balance</li>
+            <li>Sign the decryption request when prompted</li>
           </ol>
+        </div>
+
+        {/* Status Bar */}
+        <div className="status-bar">
+          <p className="status-bar-field">Ready</p>
+          <p className="status-bar-field">
+            {chain?.name || "No network"} | Chain ID: {chainId || "N/A"}
+          </p>
         </div>
       </div>
     </div>

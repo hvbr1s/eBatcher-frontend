@@ -93,7 +93,7 @@
   body {
     min-height: 100vh;
     font-family: "MS Sans Serif", "Microsoft Sans Serif", sans-serif;
-    background: teal;
+    background: var(--win98-bg);
     color: black;
     margin: 0;
     padding: 20px;
@@ -112,7 +112,7 @@
 
 :root,
 [data-theme] {
-  background: teal;
+  background: var(--win98-bg);
 }
 
 .btn {
