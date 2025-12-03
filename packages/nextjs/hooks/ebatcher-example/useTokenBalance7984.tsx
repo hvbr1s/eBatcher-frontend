@@ -130,7 +130,7 @@ export const useTokenBalance7984 = (parameters: {
         console.log("✅ Got encrypted balance handle:", handleHex);
         console.log("📝 Token metadata:", { decimals: Number(decimals), symbol });
 
-        setMessage("Got encrypted balance handle. Click 'Decrypt Balance' to reveal the amount.");
+        setMessage(`Got encrypted balance handle:\n${handleHex}\n\nClick 'Request Decryption' to reveal the amount.`);
         setBalanceHandle(handleHex);
       } catch (e: any) {
         console.error("❌ Failed to get balance:", e);

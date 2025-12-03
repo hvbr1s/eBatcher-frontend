@@ -2,8 +2,8 @@
 /* Based on minimalist design with high contrast */
 
 :root {
-  --win98-bg: #c8c8e8;
-  --win98-light: #ffffff;
+  --win98-bg: #b0b0d8;
+  --win98-light: #f8f8f8;
   --win98-dark: #000000;
   --win98-darker: #000000;
   --win98-white: #ffffff;
@@ -18,7 +18,7 @@
 
 /* Window Container */
 .window {
-  background: white;
+  background: var(--win98-light);
   border: 2px solid black;
   box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
   font-family: "MS Sans Serif", "Microsoft Sans Serif", sans-serif;
@@ -45,15 +45,15 @@
 /* Window Body */
 .window-body {
   padding: 15px;
-  background: white;
+  background: var(--win98-light);
 }
 
 /* Fieldset */
 fieldset {
-  border: 2px groove white;
+  border: 2px groove var(--win98-light);
   padding: 10px;
   margin-bottom: 10px;
-  background: white;
+  background: var(--win98-light);
 }
 
 legend {
@@ -121,7 +121,7 @@ button:disabled {
   display: flex;
   border-bottom: 2px solid black;
   margin-bottom: 15px;
-  background: white;
+  background: var(--win98-light);
 }
 
 .tab-button {
@@ -137,8 +137,8 @@ button:disabled {
 }
 
 .tab-button.active {
-  background: white;
-  border-bottom: 2px solid white;
+  background: var(--win98-light);
+  border-bottom: 2px solid var(--win98-light);
   margin-bottom: -2px;
   font-weight: bold;
 }
