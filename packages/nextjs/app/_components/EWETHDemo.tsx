@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useFhevm } from "@fhevm-sdk";
+import { useFhevm } from "fhevm-sdk";
 import { useAccount } from "wagmi";
 import { RainbowKitCustomConnectButton } from "~~/components/helper/RainbowKitCustomConnectButton";
 import { useEWETHWagmi } from "~~/hooks/eweth-example/useEWETHWagmi";
