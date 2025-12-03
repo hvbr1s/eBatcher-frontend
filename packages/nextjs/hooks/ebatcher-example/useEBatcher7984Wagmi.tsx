@@ -3,9 +3,9 @@
 import { useCallback, useMemo, useState } from "react";
 import { useDeployedContractInfo } from "../helper";
 import { useWagmiEthers } from "../wagmi/useWagmiEthers";
-import { FhevmInstance } from "@fhevm-sdk";
-import { buildParamsFromAbi, getEncryptionMethod, toHex, useFHEDecrypt, useFHEEncryption } from "@fhevm-sdk";
-import { GenericStringInMemoryStorage } from "@fhevm-sdk";
+import { FhevmInstance } from "fhevm-sdk";
+import { buildParamsFromAbi, getEncryptionMethod, toHex, useFHEDecrypt, useFHEEncryption } from "fhevm-sdk";
+import { GenericStringInMemoryStorage } from "fhevm-sdk";
 import { ethers } from "ethers";
 import { useReadContract } from "wagmi";
 import type { Contract } from "~~/utils/helper/contract";
@@ -374,6 +374,24 @@ export const useEBatcher7984Wagmi = (parameters: {
       }
 
       try {
+        // Fetch token metadata for human-readable formatting
+        const decimals = await getTokenDecimals(tokenAddress);
+        const humanReadableAmount = formatTokenUnits(amount, decimals);
+
+        // Fetch token symbol
+        let tokenSymbol = "";
+        try {
+          const tokenContract = new ethers.Contract(
+            tokenAddress,
+            ["function symbol() external view returns (string)"],
+            ethersReadonlyProvider,
+          );
+          tokenSymbol = await tokenContract.symbol();
+        } catch (e) {
+          console.warn("Failed to fetch token symbol:", e);
+          tokenSymbol = "tokens";
+        }
+
         const { method, error } = getEncryptionMethodForFunction("batchSendTokenSameAmount");
         if (!method) {
           setMessage(error ?? "Encryption method not found");
@@ -422,7 +440,7 @@ export const useEBatcher7984Wagmi = (parameters: {
         );
         const receipt = await tx.wait(2); // Wait for 2 confirmations
         setMessage(
-          `✅ Confirmed! Sent ${amount.toString()} tokens to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`,
+          `✅ Confirmed! Sent ${humanReadableAmount} ${tokenSymbol} to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`,
         );
       } catch (e: any) {
         console.error("❌ Batch transfer error:", e);
@@ -522,6 +540,25 @@ export const useEBatcher7984Wagmi = (parameters: {
       }
 
       try {
+        // Fetch token metadata for human-readable formatting
+        const decimals = await getTokenDecimals(tokenAddress);
+        const totalAmount = amounts.reduce((sum, amt) => sum + amt, BigInt(0));
+        const humanReadableTotalAmount = formatTokenUnits(totalAmount, decimals);
+
+        // Fetch token symbol
+        let tokenSymbol = "";
+        try {
+          const tokenContract = new ethers.Contract(
+            tokenAddress,
+            ["function symbol() external view returns (string)"],
+            ethersReadonlyProvider,
+          );
+          tokenSymbol = await tokenContract.symbol();
+        } catch (e) {
+          console.warn("Failed to fetch token symbol:", e);
+          tokenSymbol = "tokens";
+        }
+
         setMessage("Encrypting amounts...");
 
         // Encrypt all amounts in a single session to get one shared inputProof
@@ -569,7 +606,7 @@ export const useEBatcher7984Wagmi = (parameters: {
         );
         const receipt = await tx.wait(2); // Wait for 2 confirmations
         setMessage(
-          `✅ Confirmed! Sent different amounts to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`,
+          `✅ Confirmed! Sent ${humanReadableTotalAmount} ${tokenSymbol} total to ${recipients.length} recipients.\n\nTransaction: ${receipt.hash}\nBlock: ${receipt.blockNumber}\nConfirmations: 2+\nExplorer: ${explorerUrl}`,
         );
       } catch (e: any) {
         console.error("❌ Batch transfer error:", e);

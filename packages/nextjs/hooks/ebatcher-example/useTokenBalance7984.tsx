@@ -2,9 +2,9 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useWagmiEthers } from "../wagmi/useWagmiEthers";
-import { FhevmInstance } from "@fhevm-sdk";
-import { useFHEDecrypt } from "@fhevm-sdk";
-import { GenericStringInMemoryStorage } from "@fhevm-sdk";
+import { FhevmInstance } from "fhevm-sdk";
+import { useFHEDecrypt } from "fhevm-sdk";
+import { GenericStringInMemoryStorage } from "fhevm-sdk";
 import { ethers } from "ethers";
 
 /**
